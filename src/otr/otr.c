@@ -20,9 +20,11 @@
  */
 
 #define _GNU_SOURCE
+#include <glib.h>
 #include <gcrypt.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "otr-formats.h"
 #include "key.h"
 

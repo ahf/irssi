@@ -21,10 +21,10 @@
 #ifndef IRSSI_OTR_FORMATS_H
 #define IRSSI_OTR_FORMATS_H
 
-#include "irssi-otr.h"
+#include "formats.h"
 
 /*
- * Must be in sync with the otr_formats array.
+ * Must be in sync with the fe_otr_formats array.
  */
 enum otr_status_format {
 	TXT_OTR_MODULE_NAME      = 0,
@@ -36,6 +36,6 @@ enum otr_status_format {
 	TXT_STB_TRUST            = 6,
 };
 
-extern FORMAT_REC otr_formats[];
+extern FORMAT_REC fe_otr_formats[];
 
 #endif /* IRSSI_OTR_FORMATS_H */

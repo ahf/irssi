@@ -21,7 +21,7 @@
 #include "otr.h"
 #include "otr-formats.h"
 
-FORMAT_REC otr_formats[] = {
+FORMAT_REC fe_otr_formats[] = {
 	{ MODULE_NAME, "OTR", 0 },
 
 	/* Status bar format. */

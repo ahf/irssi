@@ -25,11 +25,11 @@
 #include <glib/gstdio.h>
 #include <stdio.h>
 
-#include "cmd.h"
 #include "key.h"
 #include "otr.h"
 #include "otr-formats.h"
 #include "utils.h"
+#include "otr-fe.h"
 
 int debug = FALSE;
 
@@ -179,41 +179,6 @@ static void cmd_me(const char *data, IRC_SERVER_REC *server,
 }
 
 /*
- * Handle the "/otr" command.
- */
-static void cmd_otr(const char *data, void *server, WI_ITEM_REC *item)
-{
-	char *cmd = NULL;
-	QUERY_REC *query;
-
-	query = QUERY(item);
-
-	/* Check key generation state. */
-	key_gen_check();
-
-	if (*data == '\0') {
-		IRSSI_INFO(NULL, NULL, "Alive!");
-		return;
-	}
-
-	utils_extract_command(data, &cmd);
-	if (cmd == NULL) {
-		/* ENOMEM and cmd is untouched. */
-		return;
-	}
-
-	if (query && query->server && query->server->connrec) {
-		cmd_generic(user_state_global, query->server, query->name, cmd, data);
-	} else {
-		cmd_generic(user_state_global, NULL, NULL, cmd, data);
-	}
-
-	statusbar_items_redraw("otr");
-
-	free(cmd);
-}
-
-/*
  * Optionally finish conversations on /quit. We're already doing this on unload
  * but the quit handler terminates irc connections before unloading.
  */
@@ -236,7 +201,7 @@ static void otr_statusbar(struct SBAR_ITEM_REC *item, int get_size_only)
 	}
 
 	statusbar_item_default_handler(item, get_size_only,
-			formatnum ? otr_formats[formatnum].def : "", " ", FALSE);
+			formatnum ? fe_otr_formats[formatnum].def : "", " ", FALSE);
 }
 
 /*
@@ -295,8 +260,6 @@ void otr_core_init(void)
 
 	module_register("otr", "core");
 
-	theme_register(otr_formats);
-
 	ret = create_module_dir();
 	if (ret < 0) {
 		return;
@@ -314,9 +277,10 @@ void otr_core_init(void)
 	signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
 	signal_add("query destroyed", (SIGNAL_FUNC) sig_query_destroyed);
 
-	command_bind("otr", NULL, (SIGNAL_FUNC) cmd_otr);
 	command_bind_first("quit", NULL, (SIGNAL_FUNC) cmd_quit);
 	command_bind_irc_first("me", NULL, (SIGNAL_FUNC) cmd_me);
+
+	otr_fe_init();
 
 	statusbar_item_register("otr", NULL, otr_statusbar);
 	statusbar_items_redraw("window");
@@ -331,7 +295,8 @@ void otr_core_deinit(void)
 	signal_remove("message private", (SIGNAL_FUNC) sig_message_private);
 	signal_remove("query destroyed", (SIGNAL_FUNC) sig_query_destroyed);
 
-	command_unbind("otr", (SIGNAL_FUNC) cmd_otr);
+	otr_fe_deinit();
+
 	command_unbind("quit", (SIGNAL_FUNC) cmd_quit);
 	command_unbind("me", (SIGNAL_FUNC) cmd_me);
 
@@ -345,6 +310,4 @@ void otr_core_deinit(void)
 	otr_free_user_state(user_state_global);
 
 	otr_lib_uninit();
-
-	theme_unregister();
 }
