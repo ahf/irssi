@@ -22,8 +22,6 @@
 #ifndef IRSSI_IRSSI_OTR_H
 #define IRSSI_IRSSI_OTR_H
 
-#define UOFF_T_LONG_LONG 1
-
 #include <src/common.h>
 #include <src/core/commands.h>
 #include <src/core/modules.h>
