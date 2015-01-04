@@ -81,15 +81,13 @@ static struct key_gen_data key_gen_state = {
  */
 static char *file_path_build(const char *path)
 {
+	g_assert(path != NULL);
+
 	int ret;
 	char *filename;
 
-	if (path == NULL) {
-		path = "";
-	}
-
 	/* Either NULL or the filename is returned here which is valid. */
-	ret = asprintf(&filename, "%s%s", get_irssi_dir(), path);
+	ret = asprintf(&filename, "%s/%s", get_irssi_dir(), path);
 	if (ret < 0) {
 		filename = NULL;
 	}
@@ -290,8 +288,7 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 
 	IRSSI_MSG("Key generation started for %9%s%n", key_gen_state.account_name);
 
-	err = otrl_privkey_generate_start(ustate->otr_state, account_name,
-			OTR_PROTOCOL_ID, &key_gen_state.newkey);
+	err = otrl_privkey_generate_start(ustate->otr_state, account_name, OTR_PROTOCOL_ID, &key_gen_state.newkey);
 	if (err != GPG_ERR_NO_ERROR || key_gen_state.newkey == NULL) {
 		IRSSI_MSG("Key generation start failed. Err: %s", gcry_strerror(err));
 		reset_key_gen_state();

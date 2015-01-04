@@ -248,7 +248,7 @@ static int create_module_dir(void)
 	char *dir_path = NULL;
 
 	/* Create ~/.irssi/otr directory. */
-	ret = asprintf(&dir_path, "%s%s", get_irssi_dir(), OTR_DIR);
+	ret = asprintf(&dir_path, "%s/%s", get_irssi_dir(), OTR_DIR);
 	if (ret < 0) {
 		IRSSI_MSG("Unable to allocate home dir path.");
 		return ret;

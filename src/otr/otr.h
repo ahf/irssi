@@ -42,7 +42,7 @@
 /* OTR protocol id */
 #define OTR_PROTOCOL_ID               "IRC"
 
-#define OTR_DIR                       "/otr"
+#define OTR_DIR                       "otr"
 #define OTR_KEYFILE                   OTR_DIR "/otr.key"
 #define OTR_FINGERPRINTS_FILE         OTR_DIR "/otr.fp"
 #define OTR_INSTAG_FILE               OTR_DIR "/otr.instag"
