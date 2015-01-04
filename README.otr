@@ -13,7 +13,8 @@ source code tree.
  5. ./autogen.sh --enable-otr && make
  6. Start irssi using: ./src/fe-text/irssi --home=~/.irssi-otr-native/ -!
  7. Within Irssi, load the OTR module: /load /path/to/irssi-otr-native/src/otr/.libs/libotr_core.so
- 8. Use the OTR module like you'd normally and report any issues and crashes here on Github or to ahf on IRC.
+ 8. Use the OTR module like you'd normally and report any issues and crashes
+    here on Github or to ahf on IRC (in #irssi on freenode or #otr on OFTC).
 
 ## Known issues.
 
