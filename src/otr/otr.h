@@ -32,7 +32,7 @@
 #include "utils.h"
 
 /* irssi module name */
-#define MODULE_NAME                   "otr"
+#define MODULE_NAME                   "otr/core"
 
 /*
  * XXX: Maybe this should be configurable?

@@ -293,7 +293,7 @@ void otr_core_init(void)
 {
 	int ret;
 
-	module_register(MODULE_NAME, "core");
+	module_register("otr", "core");
 
 	theme_register(otr_formats);
 
