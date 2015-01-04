@@ -49,7 +49,6 @@ struct key_gen_data {
 	char *key_file_path;
 	enum key_gen_status status;
 	gcry_error_t gcry_error;
-	void *newkey;
 };
 
 /*
@@ -150,8 +149,6 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 	key_gen_state.status = event.status;
 	key_gen_state.gcry_error = event.error;
 
-	g_warning("Status: %d", event.status);
-
 	if (event.status == KEY_GEN_FINISHED || event.status == KEY_GEN_ERROR) {
 		/* Worker is done. */
 		g_source_remove(worker->tag);
@@ -176,6 +173,8 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
  */
 static void generate_key(GIOChannel *pipe)
 {
+	g_assert(pipe != NULL);
+
 	pid_t pid;
 
 	pid = fork();
@@ -194,12 +193,10 @@ static void generate_key(GIOChannel *pipe)
 	/* child process */
 	gcry_error_t err;
 
-	g_assert(key_gen_state.newkey != NULL);
-
 	key_gen_state.status = KEY_GEN_RUNNING;
 	emit_event(pipe, KEY_GEN_RUNNING, GPG_ERR_NO_ERROR);
 
-	err = otrl_privkey_generate_calculate(key_gen_state.newkey);
+	err = otrl_privkey_generate(key_gen_state.ustate->otr_state, key_gen_state.key_file_path, key_gen_state.account_name, OTR_PROTOCOL_ID);
 
 	if (err != GPG_ERR_NO_ERROR) {
 		emit_event(pipe, KEY_GEN_ERROR, err);
@@ -219,24 +216,16 @@ void key_gen_check(void)
 {
 	gcry_error_t err;
 
-	g_warning("Key: %p", key_gen_state.newkey);
-	g_warning("Path: %s", key_gen_state.key_file_path);
-	g_warning("OTR state: %p", key_gen_state.ustate);
-
-	if (key_gen_state.ustate != NULL) {
-		g_warning("OTR state->otr_state: %p", key_gen_state.ustate->otr_state);
-	}
-
 	switch (key_gen_state.status) {
 	case KEY_GEN_FINISHED:
-		err = otrl_privkey_generate_finish(key_gen_state.ustate->otr_state, key_gen_state.newkey, key_gen_state.key_file_path);
+		err = otrl_privkey_read(key_gen_state.ustate->otr_state, key_gen_state.key_file_path);
+
 		if (err != GPG_ERR_NO_ERROR) {
-			IRSSI_MSG("Key generation finish state failed. Err: %s",
-					gcry_strerror(err));
+			IRSSI_MSG("Key generation finish state failed. Err: %s", gcry_strerror(err));
 		} else {
-			IRSSI_MSG("Key generation for %9%s%n completed",
-					key_gen_state.account_name);
+			IRSSI_MSG("Key generation for %9%s%n completed", key_gen_state.account_name);
 		}
+
 		reset_key_gen_state();
 		break;
 	case KEY_GEN_ERROR:
@@ -287,13 +276,6 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	}
 
 	IRSSI_MSG("Key generation started for %9%s%n", key_gen_state.account_name);
-
-	err = otrl_privkey_generate_start(ustate->otr_state, account_name, OTR_PROTOCOL_ID, &key_gen_state.newkey);
-	if (err != GPG_ERR_NO_ERROR || key_gen_state.newkey == NULL) {
-		IRSSI_MSG("Key generation start failed. Err: %s", gcry_strerror(err));
-		reset_key_gen_state();
-		return;
-	}
 
 	if (pipe(fd) != 0) {
 		IRSSI_INFO(NULL, NULL, "Key generation failed. Error: pipe()");
