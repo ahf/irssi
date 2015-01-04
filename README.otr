@@ -1,6 +1,24 @@
 README for OTR Merge Project
 ============================
 
+This file is used to track the progress of merging Irssi-OTR into the Irssi
+source code tree.
+
+## Testing
+
+ 1. Install the requirements listed at https://github.com/cryptodotis/irssi-otr
+ 2. git clone https://github.com/ahf/irssi.git irssi-native-otr
+ 3. cd irssi-native-otr
+ 4. git checkout native-otr
+ 5. ./autogen.sh --enable-otr && make
+ 6. Start irssi using: ./src/fe-text/irssi --home=~/.irssi-otr-native/ -!
+ 7. Within Irssi, load the OTR module: /load /path/to/irssi-otr-native/src/otr/.libs/libotr_core.so
+ 8. Use the OTR module like you'd normally and report any issues and crashes here on Github or to ahf on IRC.
+
+## Known issues.
+
+1. Assertion failure when /quit'ing irssi whilst in the middle of an OTR session.
+
 ## TODO
 
 1. Add setting: autolog_ignore_otr (default: true) and required API in the
