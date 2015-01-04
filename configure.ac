@@ -165,6 +165,15 @@ AC_ARG_ENABLE(dane,
 	fi,
 	want_dane=no)
 
+AC_ARG_ENABLE(otr,
+[  --enable-otr            Enable OTR support],
+	if test x$enableval = xno; then
+		want_otr=no
+	else
+		want_otr=yes
+	fi,
+	want_otr=no)
+
 AC_ARG_ENABLE(true-color,
 [  --enable-true-color     Build with true color support in terminal],
 	if test x$enableval = xno ; then
@@ -646,6 +655,16 @@ if test "x$want_dane" = "xyes"; then
 	fi
 fi
 
+have_otr=no
+if test "x$want_otr" = "xyes"; then
+	AM_PATH_LIBGCRYPT(1:1.2.0, [], [AC_ERROR(libgcrypt 1.2.0 or newer is required.)])
+	AM_PATH_LIBOTR(4.0.0, [], [AC_ERROR([libotr 4.0.0 or newer is required.])])
+
+	have_otr=yes
+fi
+
+AM_CONDITIONAL(HAVE_OTR, test "$have_otr" != "no")
+
 if test "x$want_truecolor" = "xyes" -a "x$want_termcap" != "xyes" -a "x$want_terminfo" = "xyes" ; then
 	AC_DEFINE([TERM_TRUECOLOR], [], [true color support in terminal])
 else
@@ -675,6 +694,7 @@ src/perl/common/Makefile.PL
 src/perl/irc/Makefile.PL
 src/perl/ui/Makefile.PL
 src/perl/textui/Makefile.PL
+src/otr/Makefile
 scripts/Makefile
 scripts/examples/Makefile
 docs/Makefile
@@ -784,6 +804,7 @@ fi
 echo "Building with 64bit DCC support .. : $offt_64bit"
 echo "Building with garbage collector .. : $have_gc"
 echo "Building with DANE support ....... : $have_dane"
+echo "Building with OTR support ........ : $have_otr"
 echo "Building with true color support.. : $want_truecolor"
 
 echo
