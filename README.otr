@@ -1,0 +1,17 @@
+README for OTR Merge Project
+============================
+
+## TODO
+
+1. Add setting: autolog_ignore_otr (default: true) and required API in the
+   autolog subsystem. We want to ensure that by default Irssi shouldn't log
+   anything between users using OTR.
+
+2. Fuzzy matching of fingerprints in OTR commands that accepts a fingerprint.
+
+## Notes from #OTR @ OFTC
+
+1. so first to authq, how do you handle a secret with spaces?
+2. for the fp token, good idea, more usable that way and if collision, you present the FPs
+3. also would be great to be able to do like "/otr trust dgoulet@irc.freenode.net" you know ;)
+4. have a /otr msg <target> <message>, which would be like /query <target> <message> but with an /otr init before.
