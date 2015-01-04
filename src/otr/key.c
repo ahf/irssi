@@ -249,7 +249,6 @@ void key_gen_check(void)
  */
 void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 {
-	gcry_error_t err;
 	struct key_gen_worker *worker;
 	int fd[2];
 
