@@ -31,17 +31,7 @@
 #include "otr-formats.h"
 #include "utils.h"
 
-static const char *signal_args_otr_event[] = {
-	"iobject", "string", "string", NULL
-};
-
 int debug = FALSE;
-
-/*
- * Need this to decode arguments in perl signal handlers. Maybe irssi should
- * install perl/perl-signals.h which is where this definition comes from?
- */
-void perl_signal_register(const char *signal, const char **args);
 
 /*
  * Global state for the user. Init when the module loads.
@@ -330,8 +320,6 @@ void otr_core_init(void)
 
 	statusbar_item_register("otr", NULL, otr_statusbar);
 	statusbar_items_redraw("window");
-
-	perl_signal_register("otr event", signal_args_otr_event);
 }
 
 /*
