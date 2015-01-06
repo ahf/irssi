@@ -19,8 +19,7 @@ libotr_core_la_SOURCES = \
 	otr-formats.c \
 	otr-ops.c \
 	otr-fe.c \
-	otr.c \
-	utils.c
+	otr.c
 
 noinst_HEADERS = \
 	irssi-otr.h \
@@ -28,5 +27,4 @@ noinst_HEADERS = \
 	module.h \
 	otr-formats.h \
 	otr-fe.h \
-	otr.h \
-	utils.h
+	otr.h

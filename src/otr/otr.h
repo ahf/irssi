@@ -29,7 +29,6 @@
 #include <libotr/privkey.h>
 
 #include "irssi-otr.h"
-#include "utils.h"
 
 /* irssi module name */
 #define MODULE_NAME                   "otr/core"

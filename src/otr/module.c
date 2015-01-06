@@ -28,7 +28,6 @@
 #include "key.h"
 #include "otr.h"
 #include "otr-formats.h"
-#include "utils.h"
 #include "otr-fe.h"
 
 int debug = FALSE;
