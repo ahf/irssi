@@ -2,6 +2,7 @@
 #undef HAVE_IPV6
 #undef HAVE_SOCKS_H
 #undef HAVE_STATIC_PERL
+#undef HAVE_STATIC_OTR
 #undef HAVE_GMODULE
 #undef HAVE_GC_H
 #undef HAVE_GC_GC_H

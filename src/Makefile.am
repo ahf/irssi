@@ -18,4 +18,4 @@ pkginc_srcdir=$(pkgincludedir)/src
 pkginc_src_HEADERS = \
 	common.h
 
-SUBDIRS = lib-config core irc fe-common $(PERLDIR) $(TEXTUI) $(BOTUI) $(OTRDIR)
+SUBDIRS = lib-config core irc fe-common $(PERLDIR) $(OTRDIR) $(TEXTUI) $(BOTUI)

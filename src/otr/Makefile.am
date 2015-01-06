@@ -1,5 +1,11 @@
 moduledir = $(libdir)/irssi/modules
-module_LTLIBRARIES = libotr_core.la
+
+module_LTLIBRARIES = $(otr_module_lib)
+noinst_LTLIBRARIES = $(otr_static_lib)
+
+EXTRA_LTLIBRARIES = \
+	libotr_core.la \
+	libotr_core_static.la
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/src \
@@ -7,19 +13,24 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/irc/core/ \
 	-I$(top_srcdir)/src/fe-common/core/ \
 	$(GLIB_CFLAGS) \
-	$(LIBOTR_CFLAGS) \
-	$(LIBGCRYPT_CFLAGS)
+	$(OTR_CFLAGS)
 
-libotr_core_la_LDFLAGS = -module -avoid-version
-libotr_core_la_LIBADD = $(LIBOTR_LIBS) $(LIBGCRYPT_LIBS)
+libotr_core_la_LDFLAGS = -module -avoid-version -rpath $(moduledir)
+libotr_core_la_LIBADD = $(OTR_LDFLAGS)
 
-libotr_core_la_SOURCES = \
+otr_sources = \
 	key.c \
 	module.c \
 	otr-formats.c \
 	otr-ops.c \
 	otr-fe.c \
 	otr.c
+
+libotr_core_la_SOURCES = \
+	$(otr_sources)
+
+libotr_core_static_la_SOURCES = \
+	$(otr_sources)
 
 noinst_HEADERS = \
 	irssi-otr.h \
