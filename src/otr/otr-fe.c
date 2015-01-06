@@ -103,6 +103,9 @@ static void cmd_otr_trust(const char *data, SERVER_REC *server, WI_ITEM_REC *ite
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
+	if (server == NULL)
+		return;
+
 	query = QUERY(item);
 	target = query ? query->name : NULL;
 
@@ -127,6 +130,9 @@ static void cmd_otr_distrust(const char *data, SERVER_REC *server, WI_ITEM_REC *
 
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
+
+	if (server == NULL)
+		return;
 
 	query = QUERY(item);
 	target = query ? query->name : NULL;
@@ -153,11 +159,14 @@ static void cmd_otr_forget(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
-	query = QUERY(item);
-	target = query ? query->name : NULL;
+	if (server == NULL)
+		return;
 
 	if (!cmd_get_params(data, &free_arg, 1 | PARAM_FLAG_GETREST, &fingerprint))
 		return;
+
+	query = QUERY(item);
+	target = query ? query->name : NULL;
 
 	// We fallback to target if fingerprint isn't specified.
 	if (*fingerprint == '\0' && target == NULL)
@@ -193,15 +202,14 @@ static void cmd_otr_auth(const char *data, SERVER_REC *server, WI_ITEM_REC *item
 	char *secret;
 	void *free_arg;
 
-	query = QUERY(item);
-	target = query ? query->name : NULL;
-
 	if (!cmd_get_params(data, &free_arg, 1, &secret))
 		return;
 
+	query = QUERY(item);
+	target = query ? query->name : NULL;
+
 	if (server == NULL || target == NULL || *secret == '\0')
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
-
 
 	if (*secret == '\0')
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
@@ -219,11 +227,11 @@ static void cmd_otr_authq(const char *data, SERVER_REC *server, WI_ITEM_REC *ite
 	char *question, *secret;
 	void *free_arg;
 
-	query = QUERY(item);
-	target = query ? query->name : NULL;
-
 	if (!cmd_get_params(data, &free_arg, 2, &question, &secret))
 		return;
+
+	query = QUERY(item);
+	target = query ? query->name : NULL;
 
 	if (server == NULL || target == NULL || *question == '\0' || *secret == '\0')
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
