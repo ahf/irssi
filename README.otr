@@ -35,3 +35,4 @@ source code tree.
 2. for the fp token, good idea, more usable that way and if collision, you present the FPs
 3. also would be great to be able to do like "/otr trust dgoulet@irc.freenode.net" you know ;)
 4. have a /otr msg <target> <message>, which would be like /query <target> <message> but with an /otr init before.
+5. to that extent, having an option to specify the key you want to use would be useful, like "/otr init --key dgoulet@mynetwork"
