@@ -100,7 +100,7 @@ static void cmd_otr_trust(const char *data, SERVER_REC *server, WI_ITEM_REC *ite
 	QUERY_REC *query;
 	char *target;
 
-	char *fingerprint;
+	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
 	query = QUERY(item);
@@ -113,7 +113,9 @@ static void cmd_otr_trust(const char *data, SERVER_REC *server, WI_ITEM_REC *ite
 	if (*fingerprint == '\0' && target == NULL)
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	otr_trust(server, target, fingerprint, user_state_global);
+	human_fingerprint = g_ascii_strup(fingerprint, -1);
+	otr_trust(server, target, human_fingerprint, user_state_global);
+	g_free(human_fingerprint);
 
 	cmd_params_free(free_arg);
 }
@@ -123,7 +125,7 @@ static void cmd_otr_distrust(const char *data, SERVER_REC *server, WI_ITEM_REC *
 	QUERY_REC *query;
 	char *target;
 
-	char *fingerprint;
+	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
 	query = QUERY(item);
@@ -136,7 +138,9 @@ static void cmd_otr_distrust(const char *data, SERVER_REC *server, WI_ITEM_REC *
 	if (*fingerprint == '\0' && target == NULL)
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	otr_distrust(server, target, fingerprint, user_state_global);
+	human_fingerprint = g_ascii_strup(fingerprint, -1);
+	otr_distrust(server, target, human_fingerprint, user_state_global);
+	g_free(human_fingerprint);
 
 	cmd_params_free(free_arg);
 }
@@ -146,7 +150,7 @@ static void cmd_otr_forget(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 	QUERY_REC *query;
 	char *target;
 
-	char *fingerprint;
+	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
 	query = QUERY(item);
@@ -159,7 +163,9 @@ static void cmd_otr_forget(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 	if (*fingerprint == '\0' && target == NULL)
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	otr_forget(server, target, fingerprint, user_state_global);
+	human_fingerprint = g_ascii_strup(fingerprint, -1);
+	otr_forget(server, target, human_fingerprint, user_state_global);
+	g_free(human_fingerprint);
 
 	cmd_params_free(free_arg);
 }
