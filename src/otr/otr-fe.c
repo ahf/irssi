@@ -252,10 +252,7 @@ static void cmd_otr_genkey(const char *data)
 	if (*account_name == '\0')
 		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
 
-	if (strchr(account_name, '@') != 0)
-		key_gen_run(user_state_global, account_name);
-	else
-		IRSSI_INFO(NULL, NULL, "Invalid account name. Try /otr genkey nickname@irc.example.org");
+	key_gen_run(user_state_global, account_name);
 
 	cmd_params_free(free_arg);
 }
