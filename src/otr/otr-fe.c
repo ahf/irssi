@@ -60,13 +60,13 @@ static void cmd_otr_init(const char *data, SERVER_REC *server, WI_ITEM_REC *item
 	query = QUERY(item);
 	target = query->name;
 
-	ctx = otr_find_context(server, target, 0);
+	ctx = otr_find_context(server, target, FALSE);
 	if (ctx && ctx->msgstate == OTRL_MSGSTATE_ENCRYPTED) {
 		IRSSI_NOTICE(server, target, "Already secured");
 		return;
 	}
 
-	IRSSI_NOTICE(server, target, "Initiating OTR session...");
+	IRSSI_NOTICE(server, target, "Initiating OTR session using key: %s ...", ctx->accountname);
 
 	/*
 	 * Irssi does not handle well the HTML tag in the default OTR query message
