@@ -424,7 +424,7 @@ void otr_finishall(struct otr_user_state *ustate)
 		}
 
 		server = find_server_by_network(context->accountname);
-		if (server != NULL) {
+		if (server == NULL) {
 			IRSSI_DEBUG("Unable to find server window for account %s", context->accountname);
 			continue;
 		}
