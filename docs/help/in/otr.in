@@ -14,12 +14,10 @@ To add the OTR status bar (highly recommended):
 AUTH <secret>
     Start or respond to an authentication process.
 
-AUTHQ [<[question]>] <secret>
-    Start a SMP authentication process. The question MUST be enclosed in
-    brackets and followed by the secret with at least one white space between
-    the question and secret.
+AUTHQ <question> <secret>
+    Start a SMP authentication process.
 
-    Example: %9/otr authq [My question is] rest is the secret%n
+    Example: %9/otr authq "My question is" "this is the secret"%n
 
 AUTHABORT
     Abort an ongoing authentication process.
@@ -31,7 +29,7 @@ CONTEXTS
 DEBUG
     Turn on debugging.
 
-DISTRUST [<fp>]
+DISTRUST <fingerprint>
     Distrust a specific fingerprint. This command can be done inside a private
     window for which the current fingerprint of the other person will be used
     or else set fp to a human readable OTR fingerprint available with the above
@@ -43,19 +41,17 @@ FINISH
     End the OTR session. This MUST be done inside a private conversation
     window.
 
-FORGET [<fp>]
+FORGET <fingerprint>
     Forget a specific fingerprint (deleted from the known fingerprints). The
     behavior is the same as the distrust command explained above.
 
-GENKEY <nickname>@<im.server.net>
+GENKEY <name>
     Generate OTR keys for a given account name. This is done automatically
     if someone tries to establish a secure session.
 
-    This process is done in a background thread and can take an arbitrary
+    This process is done in a background worker and can take an arbitrary
     amount of time. The completion is checked when another irssi event is
-    catched. Unfortunately, for technical reasons, the thread can't notify the
-    irssi main window so a status check is done at each irssi events and a
-    message is printed if the key is ready.
+    catched.
 
 HELP
     Print this help.
@@ -66,7 +62,7 @@ INFO
 INIT
     Initialize an OTR conversation within a private conversation window.
 
-TRUST [<fp>]
+TRUST <fingerprint>
     Trust a specific fingerprint. The behavior is the same as the forget and
     distrust commands explained above.
 
@@ -89,7 +85,7 @@ phone or GPG-signed email or use the socialist millionaire problem mechanism
 (SMP) which is basically to ask a question for which the answer can only be
 known by the other person.
 
-%9/otr auth <shared-secret>%n OR %9/otr authq [A question] <shared-secret>%n
+%9/otr auth <shared-secret>%n OR %9/otr authq "A question" <shared-secret>%n
 
 Or to respond to an authentication:
 
