@@ -136,6 +136,7 @@ static void reset_key_gen_state(void)
 static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 {
 	struct key_gen_event event;
+	gcry_error_t err;
 
 	g_assert(worker != NULL);
 
@@ -161,7 +162,23 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 
 		g_free(worker);
 
-		key_gen_check();
+		if (event.status == KEY_GEN_ERROR) {
+			IRSSI_MSG("Key generation for %9%s%n failed. Err: %s (%d)",
+					key_gen_state.account_name,
+					gcry_strerror(key_gen_state.gcry_error),
+					key_gen_state.gcry_error);
+			reset_key_gen_state();
+			return;
+		}
+
+		err = otrl_privkey_read(key_gen_state.ustate->otr_state, key_gen_state.key_file_path);
+
+		if (err != GPG_ERR_NO_ERROR)
+			IRSSI_MSG("Key generation finish state failed. Err: %s", gcry_strerror(err));
+		else
+			IRSSI_MSG("Key generation for %9%s%n completed", key_gen_state.account_name);
+
+		reset_key_gen_state();
 	}
 }
 
@@ -207,39 +224,6 @@ static void generate_key(GIOChannel *pipe)
 	emit_event(pipe, KEY_GEN_FINISHED, GPG_ERR_NO_ERROR);
 
 	_exit(99);
-}
-
-/*
- * Check key generation state and print message to user according to state.
- */
-void key_gen_check(void)
-{
-	gcry_error_t err;
-
-	switch (key_gen_state.status) {
-	case KEY_GEN_FINISHED:
-		err = otrl_privkey_read(key_gen_state.ustate->otr_state, key_gen_state.key_file_path);
-
-		if (err != GPG_ERR_NO_ERROR) {
-			IRSSI_MSG("Key generation finish state failed. Err: %s", gcry_strerror(err));
-		} else {
-			IRSSI_MSG("Key generation for %9%s%n completed", key_gen_state.account_name);
-		}
-
-		reset_key_gen_state();
-		break;
-	case KEY_GEN_ERROR:
-		IRSSI_MSG("Key generation for %9%s%n failed. Err: %s (%d)",
-				key_gen_state.account_name,
-				gcry_strerror(key_gen_state.gcry_error),
-				key_gen_state.gcry_error);
-		reset_key_gen_state();
-		break;
-	case KEY_GEN_RUNNING:
-	case KEY_GEN_IDLE:
-		/* Do nothing */
-		break;
-	};
 }
 
 /*

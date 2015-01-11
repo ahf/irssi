@@ -46,8 +46,6 @@ static void sig_server_sendmsg(SERVER_REC *server, const char *target,
 	int ret;
 	char *otrmsg = NULL;
 
-	key_gen_check();
-
 	if (GPOINTER_TO_INT(target_type_p) != SEND_TARGET_NICK) {
 		otrl_message_free(otrmsg);
 		return;
@@ -80,8 +78,6 @@ void sig_message_private(SERVER_REC *server, const char *msg,
 {
 	int ret;
 	char *new_msg = NULL;
-
-	key_gen_check();
 
 	ret = otr_receive(server, msg, nick, &new_msg);
 	if (ret) {
@@ -135,8 +131,6 @@ static void cmd_me(const char *data, IRC_SERVER_REC *server,
 	QUERY_REC *query;
 
 	query = QUERY(item);
-
-	key_gen_check();
 
 	if (query == NULL || query->server == NULL) {
 		return;

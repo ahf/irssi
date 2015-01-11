@@ -23,7 +23,6 @@
 
 #include "otr.h"
 
-void key_gen_check(void);
 void key_gen_run(struct otr_user_state *ustate, const char *account_name);
 void key_load(struct otr_user_state *ustate);
 void key_load_fingerprints(struct otr_user_state *ustate);
