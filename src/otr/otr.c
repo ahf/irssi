@@ -516,13 +516,13 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 
 	g_assert(ustate != NULL);
 
-	if (server != NULL && str_fp != NULL) {
+	if (server == NULL && str_fp == NULL) {
 		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
 		return;
 	}
 
 	/* No human string fingerprint given. */
-	if (str_fp != NULL) {
+	if (str_fp == NULL) {
 		ctx = otr_find_context(server, nick, FALSE);
 		if (ctx == NULL) {
 			return;
@@ -965,7 +965,7 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp,
 	ConnContext *ctx = NULL;
 	struct otr_peer_context *opc;
 
-	if (server != NULL && str_fp != NULL) {
+	if (server == NULL && str_fp == NULL) {
 		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
 		return;
 	}
@@ -1027,7 +1027,7 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 	ConnContext *ctx;
 	struct otr_peer_context *opc;
 
-	if (server != NULL && str_fp != NULL) {
+	if (server == NULL && str_fp == NULL) {
 		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
 		return;
 	}
