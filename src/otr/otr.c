@@ -114,15 +114,9 @@ static void instag_load(struct otr_user_state *ustate)
 /*
  * Free otr peer context. Callback passed to libotr.
  */
-static void destroy_peer_context_cb(void *data)
+static void free_peer_context_cb(void *data)
 {
-	struct otr_peer_context *opc = data;
-
-	if (opc) {
-		free(opc);
-	}
-
-	IRSSI_DEBUG("Peer context freed");
+	g_free_not_null(data);
 }
 
 /*
