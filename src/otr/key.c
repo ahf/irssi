@@ -315,9 +315,9 @@ void key_write_fingerprints(struct otr_user_state *ustate)
 
 	err = otrl_privkey_write_fingerprints(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
-		IRSSI_DEBUG("Fingerprints saved to %9%s%9", filename);
+		IRSSI_OTR_DEBUG("Fingerprints saved to %9%s%9", filename);
 	} else {
-		IRSSI_DEBUG("Error writing fingerprints: %d (%d)",
+		IRSSI_OTR_DEBUG("Error writing fingerprints: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
 
@@ -341,9 +341,9 @@ void key_write_instags(struct otr_user_state *ustate)
 
 	err = otrl_instag_write(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
-		IRSSI_DEBUG("Instance tags saved in %9%s%9", filename);
+		IRSSI_OTR_DEBUG("Instance tags saved in %9%s%9", filename);
 	} else {
-		IRSSI_DEBUG("Error saving instance tags: %d (%d)",
+		IRSSI_OTR_DEBUG("Error saving instance tags: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
 
@@ -368,16 +368,16 @@ void key_load(struct otr_user_state *ustate)
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {
-		IRSSI_DEBUG("No private keys found in %9%s%9", filename);
+		IRSSI_OTR_DEBUG("No private keys found in %9%s%9", filename);
 		free(filename);
 		return;
 	}
 
 	err = otrl_privkey_read(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
-		IRSSI_DEBUG("Private keys loaded from %9%s%9", filename);
+		IRSSI_OTR_DEBUG("Private keys loaded from %9%s%9", filename);
 	} else {
-		IRSSI_DEBUG("Error loading private keys: %d (%d)",
+		IRSSI_OTR_DEBUG("Error loading private keys: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
 }
@@ -400,7 +400,7 @@ void key_load_fingerprints(struct otr_user_state *ustate)
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {
-		IRSSI_DEBUG("No fingerprints found in %9%s%9", filename);
+		IRSSI_OTR_DEBUG("No fingerprints found in %9%s%9", filename);
 		free(filename);
 		return;
 	}
@@ -408,9 +408,9 @@ void key_load_fingerprints(struct otr_user_state *ustate)
 	err = otrl_privkey_read_fingerprints(ustate->otr_state, filename, NULL,
 			NULL);
 	if (err == GPG_ERR_NO_ERROR) {
-		IRSSI_DEBUG("Fingerprints loaded from %9%s%9", filename);
+		IRSSI_OTR_DEBUG("Fingerprints loaded from %9%s%9", filename);
 	} else {
-		IRSSI_DEBUG("Error loading fingerprints: %d (%d)",
+		IRSSI_OTR_DEBUG("Error loading fingerprints: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
 }

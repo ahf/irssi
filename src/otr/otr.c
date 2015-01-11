@@ -68,16 +68,16 @@ static void instag_load(struct otr_user_state *ustate)
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {
-		IRSSI_DEBUG("no instance tags found at %9%s%9", filename);
+		IRSSI_OTR_DEBUG("no instance tags found at %9%s%9", filename);
 		free(filename);
 		return;
 	}
 
 	err = otrl_instag_read(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
-		IRSSI_DEBUG("Instance tags loaded from %9%s%9", filename);
+		IRSSI_OTR_DEBUG("Instance tags loaded from %9%s%9", filename);
 	} else {
-		IRSSI_DEBUG("Error loading instance tags: %d (%d)",
+		IRSSI_OTR_DEBUG("Error loading instance tags: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
 
@@ -109,7 +109,7 @@ static void add_peer_context_cb(void *data, ConnContext *context)
 	context->app_data = opc;
 	context->app_data_free = free_peer_context_cb;
 
-	IRSSI_DEBUG("Peer context created for %s", context->username);
+	IRSSI_OTR_DEBUG("Peer context created for %s", context->username);
 }
 
 /*
@@ -269,7 +269,7 @@ int otr_send(SERVER_REC *server, const char *msg, const char *to, char **otr_msg
 	g_assert(server != NULL);
 	g_assert(server->tag != NULL);
 
-	IRSSI_DEBUG("Sending message...");
+	IRSSI_OTR_DEBUG("Sending message...");
 
 	err = otrl_message_sending(user_state_global->otr_state, &otr_ops,
 		server, server->tag, OTR_PROTOCOL_ID, to, OTRL_INSTAG_BEST, msg, NULL, otr_msg,
@@ -279,7 +279,7 @@ int otr_send(SERVER_REC *server, const char *msg, const char *to, char **otr_msg
 		return -1;
 	}
 
-	IRSSI_DEBUG("Message sent...");
+	IRSSI_OTR_DEBUG("Message sent...");
 
 	/* Add peer context to OTR context if none exists. */
 	if (ctx && !ctx->app_data) {
@@ -425,7 +425,7 @@ void otr_finishall(struct otr_user_state *ustate)
 
 		server = find_server_by_network(context->accountname);
 		if (server == NULL) {
-			IRSSI_DEBUG("Unable to find server window for account %s", context->accountname);
+			IRSSI_OTR_DEBUG("Unable to find server window for account %s", context->accountname);
 			continue;
 		}
 
@@ -631,7 +631,7 @@ static enum otr_msg_status enqueue_otr_fragment(const char *msg, struct otr_peer
 		opc->msg_len += msg_len;
 		opc->full_msg[opc->msg_len] = '\0';
 
-		IRSSI_DEBUG("Partial OTR message added to queue: %s", msg);
+		IRSSI_OTR_DEBUG("Partial OTR message added to queue: %s", msg);
 
 		/*
 		 * Are we waiting for more? If the message ends with a ".", the
@@ -674,7 +674,7 @@ static enum otr_msg_status enqueue_otr_fragment(const char *msg, struct otr_peer
 			opc->msg_size += ((msg_len * 2) + 1);
 			opc->full_msg[opc->msg_len] = '\0';
 			ret = OTR_MSG_WAIT_MORE;
-			IRSSI_DEBUG("Partial OTR message begins the queue: %s", msg);
+			IRSSI_OTR_DEBUG("Partial OTR message begins the queue: %s", msg);
 			return ret;
 		}
 
@@ -702,7 +702,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	g_assert(server != NULL);
 	g_assert(server->tag != NULL);
 
-	IRSSI_DEBUG("Receiving message...");
+	IRSSI_OTR_DEBUG("Receiving message...");
 
 	ctx = otr_find_context(server, from, 1);
 	if (ctx == NULL) {
@@ -747,11 +747,11 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 		&otr_ops, server, server->tag, OTR_PROTOCOL_ID, from, recv_msg, new_msg,
 		&tlvs, &ctx, add_peer_context_cb, server);
 	if (ret) {
-		IRSSI_DEBUG("Ignoring message of length %d from %s to %s.\n"
+		IRSSI_OTR_DEBUG("Ignoring message of length %d from %s to %s.\n"
 				"%s", strlen(msg), from, server->tag, msg);
 	} else {
 		if (*new_msg) {
-			IRSSI_DEBUG("Converted received message.");
+			IRSSI_OTR_DEBUG("Converted received message.");
 		}
 	}
 
@@ -767,7 +767,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 
 	otrl_tlv_free(tlvs);
 
-	IRSSI_DEBUG("Message received.");
+	IRSSI_OTR_DEBUG("Message received.");
 
 	if (full_msg) {
 		free(full_msg);
@@ -815,7 +815,7 @@ enum otr_status_format otr_get_status_format(SERVER_REC *server, const char *nic
 	}
 
 	if (ctx) {
-		IRSSI_DEBUG("Code: %d, state: %d, sm_prog_state: %d, auth state: %d",
+		IRSSI_OTR_DEBUG("Code: %d, state: %d, sm_prog_state: %d, auth state: %d",
 				code, ctx->msgstate, ctx->smstate->sm_prog_state,
 				ctx->auth.authstate);
 	}

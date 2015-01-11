@@ -52,7 +52,7 @@ static void ops_inject_msg(void *opdata, const char *accountname,
 {
 	SERVER_REC *server = opdata;
 
-	IRSSI_DEBUG("Inject msg:\n[%s]", message);
+	IRSSI_OTR_DEBUG("Inject msg:\n[%s]", message);
 	irssi_send_message(server, recipient, message);
 }
 
@@ -181,10 +181,10 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
 				"message from %s.", username);
 		break;
 	case OTRL_MSGEVENT_LOG_HEARTBEAT_RCVD:
-		IRSSI_DEBUG("Heartbeat received from %s.", username);
+		IRSSI_OTR_DEBUG("Heartbeat received from %s.", username);
 		break;
 	case OTRL_MSGEVENT_LOG_HEARTBEAT_SENT:
-		IRSSI_DEBUG("Heartbeat sent to %s.", username);
+		IRSSI_OTR_DEBUG("Heartbeat sent to %s.", username);
 		break;
 	case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
 		IRSSI_NOTICE(server, username, "General Error: %s.", message);
@@ -209,7 +209,7 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
 				"received from %s.", username);
 		break;
 	case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
-		IRSSI_DEBUG("%s has sent a message for a different instance.",
+		IRSSI_OTR_DEBUG("%s has sent a message for a different instance.",
 				username);
 		break;
 	}
@@ -245,7 +245,7 @@ static int ops_is_logged_in(void *opdata, const char *accountname,
 		ret = 0;
 	}
 
-	IRSSI_DEBUG("User %s %s logged in", accountname,
+	IRSSI_OTR_DEBUG("User %s %s logged in", accountname,
 			(ret == 0) ? "not" : "");
 
 	return ret;
