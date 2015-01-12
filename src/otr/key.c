@@ -163,10 +163,9 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 		g_free(worker);
 
 		if (event.status == KEY_GEN_ERROR) {
-			IRSSI_MSG("Key generation for %9%s%n failed. Err: %s (%d)",
+			IRSSI_MSG("Key generation for %9%s%n failed. Err: %s",
 					key_gen_state.account_name,
-					gcry_strerror(key_gen_state.gcry_error),
-					key_gen_state.gcry_error);
+					gcry_strerror(key_gen_state.gcry_error));
 			reset_key_gen_state();
 			return;
 		}
