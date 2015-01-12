@@ -201,7 +201,7 @@ static void otr_statusbar(struct SBAR_ITEM_REC *item, int get_size_only)
 /*
  * Create otr module directory if none exists.
  */
-static int create_module_dir(void)
+static void create_module_dir(void)
 {
 	int ret;
 	char *dir_path = NULL;
@@ -209,23 +209,15 @@ static int create_module_dir(void)
 
 	/* Create ~/.irssi/otr directory. */
 	ret = asprintf(&dir_path, "%s/%s", get_irssi_dir(), OTR_DIR);
-	if (ret < 0) {
+	if (ret < 0)
 		g_error("Unable to allocate memory for OTR directory path.");
-		return ret;
-	}
 
-	if (stat(dir_path, &statbuf) != 0) {
-		if (mkpath(dir_path, 0700) != 0) {
-			g_error("Unable to create OTR directory path.");
-			ret = -1;
-		}
-	} else if (!S_ISDIR(statbuf.st_mode)) {
+	if (stat(dir_path, &statbuf) != 0 && mkpath(dir_path, 0700) != 0)
+		g_error("Unable to create OTR directory path.");
+	else if (!S_ISDIR(statbuf.st_mode))
 		g_error("%s is not a directory.\nYou should remove it with command: rm %s", dir_path, dir_path);
-		ret = -1;
-	}
 
 	free(dir_path);
-	return ret;
 }
 
 void irssi_send_message(SERVER_REC *server, const char *recipient,
@@ -249,22 +241,15 @@ void irssi_send_message(SERVER_REC *server, const char *recipient,
  */
 void otr_core_init(void)
 {
-	int ret;
-
 	module_register("otr", "core");
 
-	ret = create_module_dir();
-	if (ret < 0) {
-		return;
-	}
+	create_module_dir();
 
 	otr_lib_init();
 
 	user_state_global = otr_init_user_state();
-	if (user_state_global == NULL) {
+	if (user_state_global == NULL)
 		g_error("Unable to allocate global OTR user state");
-		return;
-	}
 
 	signal_add_first("server sendmsg", (SIGNAL_FUNC) sig_server_sendmsg);
 	signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
