@@ -27,13 +27,22 @@
  * Must be in sync with the fe_otr_formats array.
  */
 enum otr_status_format {
-	TXT_OTR_MODULE_NAME      = 0,
-	TXT_OTR_FILL_1           = 1,
-	TXT_STB_PLAINTEXT        = 2,
-	TXT_STB_FINISHED         = 3,
-	TXT_STB_UNKNOWN          = 4,
-	TXT_STB_UNTRUSTED        = 5,
-	TXT_STB_TRUST            = 6,
+	TXT_OTR_MODULE_NAME,
+
+	/* Status bar format. */
+	TXT_OTR_FILL_1,
+	TXT_OTR_STB_PLAINTEXT,
+	TXT_OTR_STB_FINISHED,
+	TXT_OTR_STB_UNKNOWN,
+	TXT_OTR_STB_UNTRUSTED,
+	TXT_OTR_STB_TRUST,
+
+	/* OTR format. */
+	TXT_OTR_FILL_2,
+	TXT_OTR_KEY_GENERATION_ERROR,
+	TXT_OTR_KEY_GENERATION_COMPLETED,
+	TXT_OTR_KEY_GENERATION_STARTED,
+	TXT_OTR_KEY_GENERATION_RUNNING
 };
 
 extern FORMAT_REC fe_otr_formats[];

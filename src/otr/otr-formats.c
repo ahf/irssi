@@ -22,16 +22,23 @@
 #include "otr-formats.h"
 
 FORMAT_REC fe_otr_formats[] = {
-	{ MODULE_NAME, "OTR", 0 },
+	{ MODULE_NAME, "Core", 0 },
 
 	/* Status bar format. */
-	{ NULL, "Statusbar", 0 } ,
+	{ NULL, "OTR Statusbar", 0 } ,
 
-	{ "stb_plaintext", "{sb plaintext}", 0},
-	{ "stb_finished", "{sb %yfinished%n}", 0},
-	{ "stb_unknown", "{sb {hilight state unknown (BUG!)}}", 0},
-	{ "stb_untrusted", "{sb %GOTR%n (%runverified%n)}", 0},
-	{ "stb_trust", "{sb %GOTR%n}", 0},
+	{ "otr_stb_plaintext", "{sb plaintext}", 0},
+	{ "otr_stb_finished", "{sb %yfinished%n}", 0},
+	{ "otr_stb_unknown", "{sb {hilight state unknown (BUG!)}}", 0},
+	{ "otr_stb_untrusted", "{sb %GOTR%n (%runverified%n)}", 0},
+	{ "otr_stb_trust", "{sb %GOTR%n}", 0},
+
+	/* OTR format. */
+	{ NULL, "OTR", 0 },
+	{ "otr_key_generation_error", "OTR key generation for {hilight $0} failed: {error $1}", 2, { 0, 0 }},
+	{ "otr_key_generation_completed", "OTR key generation for {hilight $0} completed", 1, { 0 }},
+	{ "otr_key_generation_started", "OTR key generation for {hilight $0} started", 1, { 0 }},
+	{ "otr_key_generation_running", "OTR key generation for {hilight $0} is still in progress", 1, { 0 }},
 
 	/* Last element. */
 	{ NULL, NULL, 0 }

@@ -788,29 +788,29 @@ enum otr_status_format otr_get_status_format(SERVER_REC *server, const char *nic
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
-		code = TXT_STB_PLAINTEXT;
+		code = TXT_OTR_STB_PLAINTEXT;
 		return code;
 	}
 
 	switch (ctx->msgstate) {
 	case OTRL_MSGSTATE_PLAINTEXT:
-		code = TXT_STB_PLAINTEXT;
+		code = TXT_OTR_STB_PLAINTEXT;
 		break;
 	case OTRL_MSGSTATE_ENCRYPTED:
 		/* Begin by checking trust. */
 		ret = otrl_context_is_fingerprint_trusted(ctx->active_fingerprint);
 		if (ret) {
-			code = TXT_STB_TRUST;
+			code = TXT_OTR_STB_TRUST;
 		} else {
-			code = TXT_STB_UNTRUSTED;
+			code = TXT_OTR_STB_UNTRUSTED;
 		}
 		break;
 	case OTRL_MSGSTATE_FINISHED:
-		code = TXT_STB_FINISHED;
+		code = TXT_OTR_STB_FINISHED;
 		break;
 	default:
 		IRSSI_NOTICE(server, nick, "BUG Found! Please write us a mail and describe how you got here");
-		code = TXT_STB_UNKNOWN;
+		code = TXT_OTR_STB_UNKNOWN;
 		break;
 	}
 

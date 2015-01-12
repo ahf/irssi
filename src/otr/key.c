@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "key.h"
+#include "otr-formats.h"
 
 /*
  * Status of key generation.
@@ -143,7 +144,10 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 	fcntl(g_io_channel_unix_get_fd(pipe), F_SETFL, O_NONBLOCK);
 
 	if (g_io_channel_read_block(pipe, &event, sizeof(event)) == -1) {
-		g_warning("Error: %s", g_strerror(errno));
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+				TXT_OTR_KEY_GENERATION_ERROR,
+				key_gen_state.account_name,
+				g_strerror(errno));
 		return;
 	}
 
@@ -163,7 +167,8 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 		g_free(worker);
 
 		if (event.status == KEY_GEN_ERROR) {
-			IRSSI_MSG("Key generation for %9%s%n failed. Err: %s",
+			printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+					TXT_OTR_KEY_GENERATION_ERROR,
 					key_gen_state.account_name,
 					gcry_strerror(key_gen_state.gcry_error));
 			reset_key_gen_state();
@@ -172,10 +177,16 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 
 		err = otrl_privkey_read(key_gen_state.ustate->otr_state, key_gen_state.key_file_path);
 
-		if (err != GPG_ERR_NO_ERROR)
-			IRSSI_MSG("Key generation finish state failed. Err: %s", gcry_strerror(err));
-		else
-			IRSSI_MSG("Key generation for %9%s%n completed", key_gen_state.account_name);
+		if (err != GPG_ERR_NO_ERROR) {
+			printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+					TXT_OTR_KEY_GENERATION_ERROR,
+					key_gen_state.account_name,
+					gcry_strerror(key_gen_state.gcry_error));
+		} else {
+			printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE,
+					TXT_OTR_KEY_GENERATION_COMPLETED,
+					key_gen_state.account_name);
+		}
 
 		reset_key_gen_state();
 	}
@@ -239,9 +250,7 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	g_assert(account_name != NULL);
 
 	if (key_gen_state.status != KEY_GEN_IDLE) {
-		IRSSI_INFO(NULL, NULL, "Key generation for %s is still in progress. ",
-				"Please wait until completion before creating a new key.",
-				key_gen_state.account_name);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEY_GENERATION_RUNNING, key_gen_state.account_name);
 		return;
 	}
 
@@ -252,15 +261,21 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	/* Creating key file path. */
 	key_gen_state.key_file_path = file_path_build(OTR_KEYFILE);
 	if (key_gen_state.key_file_path == NULL) {
-		IRSSI_INFO(NULL, NULL, "Key generation failed. ENOMEM");
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+				TXT_OTR_KEY_GENERATION_ERROR,
+				key_gen_state.account_name,
+				g_strerror(errno));
 		reset_key_gen_state();
 		return;
 	}
 
-	IRSSI_MSG("Key generation started for %9%s%n", key_gen_state.account_name);
+	printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEY_GENERATION_STARTED, key_gen_state.account_name);
 
 	if (pipe(fd) != 0) {
-		IRSSI_INFO(NULL, NULL, "Key generation failed. Error: pipe()");
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+				TXT_OTR_KEY_GENERATION_ERROR,
+				key_gen_state.account_name,
+				g_strerror(errno));
 		reset_key_gen_state();
 		return;
 	}
@@ -268,7 +283,10 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	worker = g_new0(struct key_gen_worker, 1);
 
 	if (worker == NULL) {
-		IRSSI_INFO(NULL, NULL, "Key generation failed. Error: ENOMEM");
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
+				TXT_OTR_KEY_GENERATION_ERROR,
+				key_gen_state.account_name,
+				g_strerror(errno));
 		reset_key_gen_state();
 		return;
 	}
