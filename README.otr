@@ -15,11 +15,6 @@ source code tree.
  8. Use the OTR support like you'd normally and report any issues and crashes
     here on Github or to ahf on IRC (in #irssi on freenode or #otr on OFTC).
 
-## Known issues.
-
-1. Assertion failure when /quit'ing irssi whilst in the middle of an OTR session.
-2. Assertion failure when not connected to server and requesting a context. (/otr trust and friends).
-
 ## TODO
 
 1. Add setting: autolog_ignore_otr (default: true) and required API in the
