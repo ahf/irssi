@@ -262,7 +262,7 @@ void otr_core_init(void)
 
 	user_state_global = otr_init_user_state();
 	if (user_state_global == NULL) {
-		IRSSI_MSG("Unable to allocate user global state");
+		g_error("Unable to allocate global OTR user state");
 		return;
 	}
 
