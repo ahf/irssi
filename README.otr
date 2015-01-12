@@ -23,6 +23,7 @@ source code tree.
 
 2. Fuzzy matching of fingerprints in OTR commands that accepts a fingerprint.
 3. We killed statusbar_items_redraw("otr") in cmd_otr() in 51b3bba95e2603c3d69de0dc6665c66227537676
+4. Handle fork() failure in generate_key() in key.c
 
 ## Notes from #OTR @ OFTC
 
