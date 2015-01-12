@@ -29,6 +29,7 @@
 #include "otr.h"
 #include "otr-formats.h"
 #include "otr-fe.h"
+#include "misc.h"
 
 int debug = FALSE;
 
@@ -204,24 +205,23 @@ static int create_module_dir(void)
 {
 	int ret;
 	char *dir_path = NULL;
+	struct stat statbuf;
 
 	/* Create ~/.irssi/otr directory. */
 	ret = asprintf(&dir_path, "%s/%s", get_irssi_dir(), OTR_DIR);
 	if (ret < 0) {
-		IRSSI_MSG("Unable to allocate home dir path.");
+		g_error("Unable to allocate memory for OTR directory path.");
 		return ret;
 	}
 
-	ret = access(dir_path, F_OK);
-	if (ret < 0) {
-		ret = mkdir(dir_path, S_IRWXU);
-		if (ret < 0) {
-			IRSSI_MSG("Unable to create %s directory.", dir_path);
-
-			// We are being explicit with the free() and return call here.
-			free(dir_path);
-			return ret;
+	if (stat(dir_path, &statbuf) != 0) {
+		if (mkpath(dir_path, 0700) != 0) {
+			g_error("Unable to create OTR directory path.");
+			ret = -1;
 		}
+	} else if (!S_ISDIR(statbuf.st_mode)) {
+		g_error("%s is not a directory.\nYou should remove it with command: rm %s", dir_path, dir_path);
+		ret = -1;
 	}
 
 	free(dir_path);
