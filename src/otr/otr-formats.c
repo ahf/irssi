@@ -40,6 +40,24 @@ FORMAT_REC fe_otr_formats[] = {
 	{ "otr_key_generation_started", "OTR key generation for {hilight $0} started", 1, { 0 }},
 	{ "otr_key_generation_running", "OTR key generation for {hilight $0} is still in progress", 1, { 0 }},
 
+	{ "otr_fingerprint_info", "OTR key fingerprint: {hilight $1} for {hilight $0}", 2, { 0, 0 }},
+	{ "otr_error_no_keys", "{error No OTR keys available}", 0},
+
+	{ "otr_session_already_secured", "Secure session with {hilight $0} already established", 1, { 0 }},
+	{ "otr_session_initiating", "Initiating OTR session ...", 0},
+
+	{ "otr_context_missing_error", "{error No active OTR contexts found}", 0},
+	{ "otr_context_list_header", "Contexts", 0},
+	{ "otr_context_list_encrypted_state_line", "{hilight $0} - {hilight $1} (Encrypted)", 2, { 0, 0 }},
+	{ "otr_context_list_plaintext_state_line", "{hilight $0} - {hilight $1} (Plaintext)", 2, { 0, 0 }},
+	{ "otr_context_list_finished_state_line", "{hilight $0} - {hilight $1} (Finished)", 2, { 0, 0 }},
+	{ "otr_context_list_unknown_state_line", "{hilight $0} - {hilight $1} (Unknown)", 2, { 0, 0 }},
+	{ "otr_context_list_unused_state_line", "{hilight $0} - {hilight $1} (Unused)", 2, { 0, 0 }},
+	{ "otr_context_list_smp_state_line", "  {hilight $0} (SMP)", 1, { 0, 0 }},
+	{ "otr_context_list_manual_state_line", "  {hilight $0} (Manual)", 1, { 0, 0 }},
+	{ "otr_context_list_unverified_state_line", "  {hilight $0} (Unverified)", 1, { 0, 0 }},
+	{ "otr_context_list_footer", "", 0},
+
 	/* Last element. */
 	{ NULL, NULL, 0 }
 };

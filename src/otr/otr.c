@@ -301,21 +301,19 @@ void otr_contexts(struct otr_user_state *ustate)
 	g_assert(ustate != NULL);
 
 	if (ustate->otr_state->context_root == NULL) {
-		IRSSI_INFO(NULL, NULL, "No active OTR contexts found");
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_ERROR);
 		return;
 	}
 
-	IRSSI_MSG("[ %KUser%n - %KAccount%n - %KStatus%n - %KFingerprint%n - "
-			"%KTrust%n ]");
+	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_HEADER);
 
 	/* Iterate over all contextes of the user state. */
 	for (ctx = ustate->otr_state->context_root; ctx != NULL; ctx = ctx->next) {
 		OtrlMessageState best_mstate = OTRL_MSGSTATE_PLAINTEXT;
 
 		/* Skip master context. */
-		if (ctx != ctx->m_context) {
+		if (ctx != ctx->m_context)
 			continue;
-		}
 
 		for (fp = ctx->fingerprint_root.next; fp != NULL; fp = fp->next) {
 			int used = 0;
@@ -324,61 +322,51 @@ void otr_contexts(struct otr_user_state *ustate)
 			username = ctx->username;
 			accountname = ctx->accountname;
 
-			for (c_iter = ctx->m_context;
-					c_iter && c_iter->m_context == ctx->m_context;
-					c_iter = c_iter->next) {
+			for (c_iter = ctx->m_context; c_iter && c_iter->m_context == ctx->m_context; c_iter = c_iter->next) {
 				/* Print account name, username and msgstate. */
 				if (c_iter->active_fingerprint == fp) {
 					used = 1;
 
-					if (c_iter->msgstate == OTRL_MSGSTATE_ENCRYPTED) {
+					if (c_iter->msgstate == OTRL_MSGSTATE_ENCRYPTED)
 						best_mstate = OTRL_MSGSTATE_ENCRYPTED;
-					} else if (c_iter->msgstate == OTRL_MSGSTATE_FINISHED &&
-							best_mstate == OTRL_MSGSTATE_PLAINTEXT) {
+					else if (c_iter->msgstate == OTRL_MSGSTATE_FINISHED && best_mstate == OTRL_MSGSTATE_PLAINTEXT)
 						best_mstate = OTRL_MSGSTATE_FINISHED;
-					}
 				}
 			}
 
 			if (used) {
 				switch (best_mstate) {
-				case OTRL_MSGSTATE_ENCRYPTED:
-					IRSSI_MSG("%b>%n %9%s%9 - %B%s%n - %GEncrypted%n -",
-							accountname, username);
-					break;
-				case OTRL_MSGSTATE_PLAINTEXT:
-					IRSSI_MSG("%b>%n %9%s%9 - %B%s%n - Plaintext -",
-							accountname, username);
-					break;
-				case OTRL_MSGSTATE_FINISHED:
-					IRSSI_MSG("%b>%n %9%s%9 - %B%s%n - %yFinished%n -",
-							accountname, username);
-					break;
-				default:
-					IRSSI_MSG("%b>%n %9%s%9 - %B%s%n - Unknown -", accountname,
-							username);
-					break;
+					case OTRL_MSGSTATE_ENCRYPTED:
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_ENCRYPTED_STATE_LINE, accountname, username);
+						break;
+					case OTRL_MSGSTATE_PLAINTEXT:
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_PLAINTEXT_STATE_LINE, accountname, username);
+						break;
+					case OTRL_MSGSTATE_FINISHED:
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_FINISHED_STATE_LINE, accountname, username);
+						break;
+					default:
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNKNOWN_STATE_LINE, accountname, username);
+						break;
 				};
-			} else {
-				IRSSI_MSG("%b>%n %9%s%9 - %B%s%n - Unused -", accountname,
-						username);
-			}
+			} else
+				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNUSED_STATE_LINE, accountname, username);
 
 			/* Hash fingerprint to human. */
 			otrl_privkey_hash_to_human(human_fp, fp->fingerprint);
 
 			trust = fp->trust;
 			if (trust && trust[0] != '\0') {
-				if (strncmp(trust, "smp", 3) == 0) {
-					IRSSI_MSG("  %g%s%n - SMP", human_fp);
-				} else {
-					IRSSI_MSG("  %g%s%n - Manual", human_fp);
-				}
-			} else {
-				IRSSI_MSG("  %r%s%n - Unverified", human_fp);
-			}
+				if (strncmp(trust, "smp", 3) == 0)
+					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_SMP_STATE_LINE, human_fp);
+				else
+					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_MANUAL_STATE_LINE, human_fp);
+			} else
+				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNVERIFIED_STATE_LINE, human_fp);
 		}
 	}
+
+	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_FOOTER);
 }
 
 /*

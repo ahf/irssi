@@ -62,11 +62,11 @@ static void cmd_otr_init(const char *data, SERVER_REC *server, WI_ITEM_REC *item
 
 	ctx = otr_find_context(server, target, FALSE);
 	if (ctx && ctx->msgstate == OTRL_MSGSTATE_ENCRYPTED) {
-		IRSSI_NOTICE(server, target, "Already secured");
+		printformat(server, target, MSGLEVEL_CRAP, TXT_OTR_SESSION_ALREADY_SECURED, ctx->accountname);
 		return;
 	}
 
-	IRSSI_NOTICE(server, target, "Initiating OTR session using key: %s ...", ctx->accountname);
+	printformat(server, target, MSGLEVEL_CRAP, TXT_OTR_SESSION_INITIATING);
 
 	/*
 	 * Irssi does not handle well the HTML tag in the default OTR query message
@@ -271,14 +271,13 @@ static void cmd_otr_info(const char *data)
 	for (key = user_state_global->otr_state->privkey_root; key != NULL; key = key->next) {
 		otrl_privkey_fingerprint(user_state_global->otr_state, ownfp, key->accountname, OTR_PROTOCOL_ID);
 
-		IRSSI_NOTICE(NULL, NULL, "%B%s%n fingerprint:", key->accountname, ownfp);
-		IRSSI_NOTICE(NULL, NULL, "%g%s%n", ownfp);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_FINGERPRINT_INFO, key->accountname, ownfp);
 
 		empty = FALSE;
 	}
 
 	if (empty)
-		IRSSI_NOTICE(NULL, NULL, "No key found!");
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_ERROR_NO_KEYS);
 }
 
 void otr_fe_init(void)
