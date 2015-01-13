@@ -390,8 +390,7 @@ void otr_finish(SERVER_REC *server, const char *nick)
 
 	otr_status_change(server, nick, OTR_STATUS_FINISHED);
 
-	IRSSI_INFO(server, nick, "Finished conversation with %9%s%9",
-			nick);
+	IRSSI_INFO(server, nick, "Finished conversation with %9%s%9", nick);
 }
 
 /*

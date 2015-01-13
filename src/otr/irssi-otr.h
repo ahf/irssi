@@ -47,11 +47,6 @@
 /*
  * Irssi macros for printing text to console.
  */
-#define IRSSI_MSG(fmt, ...)                                                 \
-	do {                                                                    \
-		printtext(NULL, NULL, MSGLEVEL_MSGS, OTR_IRSSI_MSG_PREFIX fmt,      \
-						## __VA_ARGS__);                                    \
-	} while (0)
 #define IRSSI_INFO(irssi, username, fmt, ...)                               \
 	do {                                                                    \
 		printtext(irssi, username, MSGLEVEL_CRAP, OTR_IRSSI_MSG_PREFIX fmt, \
