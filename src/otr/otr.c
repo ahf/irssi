@@ -780,25 +780,25 @@ enum otr_status_format otr_get_status_format(SERVER_REC *server, const char *nic
 	}
 
 	switch (ctx->msgstate) {
-	case OTRL_MSGSTATE_PLAINTEXT:
-		code = TXT_OTR_STB_PLAINTEXT;
-		break;
-	case OTRL_MSGSTATE_ENCRYPTED:
-		/* Begin by checking trust. */
-		ret = otrl_context_is_fingerprint_trusted(ctx->active_fingerprint);
-		if (ret) {
-			code = TXT_OTR_STB_TRUST;
-		} else {
-			code = TXT_OTR_STB_UNTRUSTED;
-		}
-		break;
-	case OTRL_MSGSTATE_FINISHED:
-		code = TXT_OTR_STB_FINISHED;
-		break;
-	default:
-		IRSSI_NOTICE(server, nick, "BUG Found! Please write us a mail and describe how you got here");
-		code = TXT_OTR_STB_UNKNOWN;
-		break;
+		case OTRL_MSGSTATE_PLAINTEXT:
+			code = TXT_OTR_STB_PLAINTEXT;
+			break;
+		case OTRL_MSGSTATE_ENCRYPTED:
+			/* Begin by checking trust. */
+			ret = otrl_context_is_fingerprint_trusted(ctx->active_fingerprint);
+			if (ret) {
+				code = TXT_OTR_STB_TRUST;
+			} else {
+				code = TXT_OTR_STB_UNTRUSTED;
+			}
+			break;
+		case OTRL_MSGSTATE_FINISHED:
+			code = TXT_OTR_STB_FINISHED;
+			break;
+		default:
+			g_warning("BUG! Invalid msgstate: %d", ctx->msgstate);
+			code = TXT_OTR_STB_UNKNOWN;
+			break;
 	}
 
 	if (ctx) {
@@ -901,11 +901,9 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 		otrl_context_forget_fingerprint(fp_forget, 1);
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n forgotten.",
-				fp);
+		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n forgotten.", fp);
 	} else {
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n NOT found",
-				(str_fp != NULL) ? str_fp : "");
+		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n NOT found", (str_fp != NULL) ? str_fp : "");
 	}
 }
 
