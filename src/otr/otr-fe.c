@@ -37,9 +37,9 @@ static void cmd_otr_debug(const char *data)
 	debug = !debug;
 
 	if (debug)
-		IRSSI_INFO(NULL, NULL, "Debug on");
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "OTR debugging enabled");
 	else
-		IRSSI_INFO(NULL, NULL, "Debug off");
+		printtext(NULL, NULL, MSGLEVEL_CRAP, "OTR debugging disabled");
 }
 
 static void cmd_otr_init(const char *data, SERVER_REC *server, WI_ITEM_REC *item)

@@ -381,7 +381,7 @@ void otr_finish(SERVER_REC *server, const char *nick)
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
-		IRSSI_INFO(server, nick, "Nothing to do");
+		printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_FINALIZE_NOTHING_TO_DO);
 		return;
 	}
 
@@ -390,7 +390,7 @@ void otr_finish(SERVER_REC *server, const char *nick)
 
 	otr_status_change(server, nick, OTR_STATUS_FINISHED);
 
-	IRSSI_INFO(server, nick, "Finished conversation with %9%s%9", nick);
+	printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_FINALIZE_COMPLETED, nick);
 }
 
 /*
@@ -528,7 +528,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 	g_assert(opc != NULL);
 
 	if (ctx->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
-		IRSSI_INFO(server, nick, "You need to establish an OTR session before you can authenticate.");
+		printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_AUTH_MISSING_SESSION_ERROR);
 		return;
 	}
 

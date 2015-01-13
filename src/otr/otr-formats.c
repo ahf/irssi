@@ -58,6 +58,11 @@ FORMAT_REC fe_otr_formats[] = {
 	{ "otr_context_list_unverified_state_line", "  {hilight $0} (Unverified)", 1, { 0, 0 }},
 	{ "otr_context_list_footer", "", 0},
 
+	{ "otr_finalize_nothing_to_do", "Nothing to do", 0},
+	{ "otr_finalize_completed", "Finished conversation with {hilight $0}", 1, { 0 }},
+
+	{ "otr_auth_missing_session_error", "{error No OTR session available}", 0},
+
 	/* Last element. */
 	{ NULL, NULL, 0 }
 };
