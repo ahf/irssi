@@ -19,6 +19,7 @@
 
 #include "key.h"
 #include "module.h"
+#include "otr-formats.h"
 
 static OtrlPolicy OTR_DEFAULT_POLICY =
 	OTRL_POLICY_MANUAL | OTRL_POLICY_WHITESPACE_START_AKE;
@@ -61,7 +62,6 @@ static void ops_inject_msg(void *opdata, const char *accountname,
  */
 static void ops_secure(void *opdata, ConnContext *context)
 {
-	int ret;
 	char ownfp[OTRL_PRIVKEY_FPRINT_HUMAN_LEN];
 	char peerfp[OTRL_PRIVKEY_FPRINT_HUMAN_LEN];
 	SERVER_REC *server = opdata;
@@ -71,14 +71,13 @@ static void ops_secure(void *opdata, ConnContext *context)
 	/* This should *really* not happened */
 	g_assert(context->msgstate == OTRL_MSGSTATE_ENCRYPTED);
 
-	IRSSI_NOTICE(server, context->username, "Gone %9secure%9");
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SECURE);
 	otr_status_change(server, context->username, OTR_STATUS_GONE_SECURE);
 
 	opc = context->app_data;
 	opc->active_fingerprint = context->active_fingerprint;
 
-	ret = otrl_context_is_fingerprint_trusted(context->active_fingerprint);
-	if (ret) {
+	if (otrl_context_is_fingerprint_trusted(context->active_fingerprint)) {
 		/* Secure and trusted */
 		return;
 	}
@@ -89,18 +88,9 @@ static void ops_secure(void *opdata, ConnContext *context)
 	otrl_privkey_fingerprint(user_state_global->otr_state, ownfp,
 			context->accountname, OTR_PROTOCOL_ID);
 
-	IRSSI_NOTICE(server, context->username, "Your peer is not "
-			"authenticated. To make sure you're talking to the right person you can "
-			"either agree on a secret and use the authentication command "
-			"%9/otr auth%9 or %9/otr authq [QUESTION] SECRET%9. You can also "
-			"use the traditional way and compare fingerprints "
-			"(e.g. telephone or GPG-signed mail) and subsequently enter "
-			"%9/otr trust%9.");
-
-	IRSSI_NOTICE(server, context->username, "Your fingerprint is: %y%s%n",
-			ownfp);
-	IRSSI_NOTICE(server, context->username, "%9%s's%9 fingerprint is: %r%s%n",
-			context->username, peerfp);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_UNAUTHENCIATED_PEER_WARNING);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_LOCAL_FINGERPRINT, ownfp);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_REMOTE_FINGERPRINT, context->username, peerfp);
 }
 
 /*
@@ -110,7 +100,7 @@ static void ops_insecure(void *opdata, ConnContext *context)
 {
 	SERVER_REC *server = opdata;
 
-	IRSSI_NOTICE(server, context->username, "Gone %rinsecure%r");
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_INSECURE);
 	otr_status_change(server, context->username, OTR_STATUS_GONE_INSECURE);
 }
 
@@ -123,95 +113,80 @@ static int ops_max_msg(void *opdata, ConnContext *context)
 	return OTR_MAX_MSG_SIZE;
 }
 
-static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
-		ConnContext *context, const char *message, gcry_error_t err)
+static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event, ConnContext *context, const char *message, gcry_error_t err)
 {
 	SERVER_REC *server = opdata;
 	char *username = context->username;
 
 	switch (msg_event) {
-	case OTRL_MSGEVENT_NONE:
-		break;
-	case OTRL_MSGEVENT_ENCRYPTION_REQUIRED:
-		IRSSI_NOTICE(server, username, "%yEncryption is required.%n");
-		break;
-	case OTRL_MSGEVENT_ENCRYPTION_ERROR:
-		IRSSI_NOTICE(server, username, "An error occurred when "
-				"encrypting your message. The message was NOT sent.");
-		break;
-	case OTRL_MSGEVENT_CONNECTION_ENDED:
-		IRSSI_NOTICE(server, username, "%9%s%9 has already closed the "
-				"connection to you.", username);
-		break;
-	case OTRL_MSGEVENT_SETUP_ERROR:
-		if (!err) {
-			err = GPG_ERR_INV_VALUE;
-		}
-		switch (err) {
-		case GPG_ERR_INV_VALUE:
-			IRSSI_NOTICE(server, username, "Error setting up private "
-					"conversation: Malformed message received");
+		case OTRL_MSGEVENT_NONE:
 			break;
-		default:
-			IRSSI_NOTICE(server, username, "Error up private "
-					"conversation: %s", gcry_strerror(err));
+		case OTRL_MSGEVENT_ENCRYPTION_REQUIRED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ENCRYPTION_REQUIRED);
 			break;
-		}
-		break;
-	case OTRL_MSGEVENT_MSG_REFLECTED:
-		IRSSI_NOTICE(server, username, "Receiving our own OTR messages. "
-				"You are either trying to talk to yourself, or someone is "
-				"reflecting your messages back at you.");
-		break;
-	case OTRL_MSGEVENT_MSG_RESENT:
-		IRSSI_NOTICE(server, username, "The last message to %9%s%9 "
-				"was resent: %s", username, message);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_NOT_IN_PRIVATE:
-		IRSSI_NOTICE(server, username, "The encrypted message received "
-				"from %s is unreadable, as you are not currently communicating "
-				"privately.", username);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_UNREADABLE:
-		IRSSI_NOTICE(server, username, "We received an unreadable "
-				"encrypted message from %s.", username);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_MALFORMED:
-		IRSSI_NOTICE(server, username, "We received a malformed data "
-				"message from %s.", username);
-		break;
-	case OTRL_MSGEVENT_LOG_HEARTBEAT_RCVD:
-		IRSSI_OTR_DEBUG("Heartbeat received from %s.", username);
-		break;
-	case OTRL_MSGEVENT_LOG_HEARTBEAT_SENT:
-		IRSSI_OTR_DEBUG("Heartbeat sent to %s.", username);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
-		IRSSI_NOTICE(server, username, "General Error: %s.", message);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_UNENCRYPTED:
-		IRSSI_NOTICE(server, username,
-				"The following message from %9%s%9 was NOT "
-				"encrypted.", username);
-		/*
-		 * This is a hack I found to send the message in a private window of
-		 * the username without creating an infinite loop since the 'message
-		 * private' signal is hijacked in this module. If someone is able to
-		 * clean this up with a more elegant solution, by all means PLEASE
-		 * submit a patch or email me a better way.
-		 */
-		signal_remove("message private", (SIGNAL_FUNC) sig_message_private);
-		signal_emit("message private", 4, server, message, username, server->connrec->address);
-		signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_UNRECOGNIZED:
-		IRSSI_NOTICE(server, username, "Unrecognized OTR message "
-				"received from %s.", username);
-		break;
-	case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
-		IRSSI_OTR_DEBUG("%s has sent a message for a different instance.",
-				username);
-		break;
+		case OTRL_MSGEVENT_ENCRYPTION_ERROR:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ENCRYPTION_ERROR);
+			break;
+		case OTRL_MSGEVENT_CONNECTION_ENDED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_CONNECTION_ENDED, username);
+			break;
+		case OTRL_MSGEVENT_SETUP_ERROR:
+			if (!err) {
+				err = GPG_ERR_INV_VALUE;
+			}
+			switch (err) {
+				case GPG_ERR_INV_VALUE:
+					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MALFORMED_MESSAGE);
+					break;
+				default:
+					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ERROR, gcry_strerror(err));
+					break;
+			}
+			break;
+		case OTRL_MSGEVENT_MSG_REFLECTED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MESSAGE_REFLECTED);
+			break;
+		case OTRL_MSGEVENT_MSG_RESENT:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MESSAGE_RESENT, username, message);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_NOT_IN_PRIVATE:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_NOT_IN_PRIVATE, username);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_UNREADABLE:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNREADABLE, username);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_MALFORMED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_MALFORMED, username);
+			break;
+		case OTRL_MSGEVENT_LOG_HEARTBEAT_RCVD:
+			IRSSI_OTR_DEBUG("Heartbeat received from %s.", username);
+			break;
+		case OTRL_MSGEVENT_LOG_HEARTBEAT_SENT:
+			IRSSI_OTR_DEBUG("Heartbeat sent to %s.", username);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_ERROR, message);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_UNENCRYPTED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNENCRYPTED, username);
+
+			/*
+			 * This is a hack I found to send the message in a private window of
+			 * the username without creating an infinite loop since the 'message
+			 * private' signal is hijacked in this module. If someone is able to
+			 * clean this up with a more elegant solution, by all means PLEASE
+			 * submit a patch or email me a better way.
+			 */
+			signal_remove("message private", (SIGNAL_FUNC) sig_message_private);
+			signal_emit("message private", 4, server, message, username, server->connrec->address);
+			signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_UNRECOGNIZED:
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNRECOGNIZED, username);
+			break;
+		case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
+			IRSSI_OTR_DEBUG("%s has sent a message for a different instance.", username);
+			break;
 	}
 }
 
@@ -231,22 +206,15 @@ static void ops_write_fingerprints(void *data)
 	key_write_fingerprints(user_state_global);
 }
 
-static int ops_is_logged_in(void *opdata, const char *accountname,
-		const char *protocol, const char *recipient)
+static int ops_is_logged_in(void *opdata, const char *accountname, const char *protocol, const char *recipient)
 {
 	int ret;
 	SERVER_REC *server = opdata;
 
-	if (server != NULL) {
-		/* Logged in */
-		ret = 1;
-	} else {
-		/* Not */
-		ret = 0;
-	}
+	/* Logged in? */
+	ret = server != NULL;
 
-	IRSSI_OTR_DEBUG("User %s %s logged in", accountname,
-			(ret == 0) ? "not" : "");
+	IRSSI_OTR_DEBUG("User %s %s logged in", accountname, ret ? "" : "not");
 
 	return ret;
 }
@@ -254,8 +222,7 @@ static int ops_is_logged_in(void *opdata, const char *accountname,
 static void ops_create_instag(void *opdata, const char *accountname,
 		const char *protocol)
 {
-	otrl_instag_generate(user_state_global->otr_state, "/dev/null",
-			accountname, protocol);
+	otrl_instag_generate(user_state_global->otr_state, "/dev/null", accountname, protocol);
 	key_write_instags(user_state_global);
 }
 
@@ -277,43 +244,39 @@ static void ops_smp_event(void *opdata, OtrlSMPEvent smp_event,
 	opc->smp_event = smp_event;
 
 	switch (smp_event) {
-	case OTRL_SMPEVENT_ASK_FOR_SECRET:
-		IRSSI_NOTICE(server, from, "%9%s%9 wants to authenticate. "
-				"Type %9/otr auth <SECRET>%9 to complete.", from);
-		opc->ask_secret = 1;
-		otr_status_change(server, from, OTR_STATUS_SMP_INCOMING);
-		break;
-	case OTRL_SMPEVENT_ASK_FOR_ANSWER:
-		IRSSI_NOTICE(server, from, "%9%s%9 wants to authenticate and "
-				"asked this question:", from);
-		IRSSI_NOTICE(server, from, "%b>%n %y%s%n", question);
-		IRSSI_NOTICE(server, from, "Type %9/otr auth <SECRET>%9 to complete.");
-		opc->ask_secret = 1;
-		otr_status_change(server, from, OTR_STATUS_SMP_INCOMING);
-		break;
-	case OTRL_SMPEVENT_IN_PROGRESS:
-		IRSSI_NOTICE(server, from, "%9%s%9 replied to your auth request",
-				from);
-		otr_status_change(server, from, OTR_STATUS_SMP_FINALIZE);
-		break;
-	case OTRL_SMPEVENT_SUCCESS:
-		IRSSI_NOTICE(server, from, "%gAuthentication successful.%n");
-		otr_status_change(server, from, OTR_STATUS_SMP_SUCCESS);
-		break;
-	case OTRL_SMPEVENT_ABORT:
-		otr_auth_abort(server, context->username);
-		otr_status_change(server, from, OTR_STATUS_SMP_ABORTED);
-		break;
-	case OTRL_SMPEVENT_FAILURE:
-	case OTRL_SMPEVENT_CHEATED:
-	case OTRL_SMPEVENT_ERROR:
-		IRSSI_NOTICE(server, from, "%RAuthentication failed%n");
-		otr_status_change(server, from, OTR_STATUS_SMP_FAILED);
-		break;
-	default:
-		IRSSI_NOTICE(server, from, "Received unknown SMP event. "
-			"Ignoring");
-		break;
+		case OTRL_SMPEVENT_ASK_FOR_SECRET:
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_SECRET_QUESTION, from);
+			opc->ask_secret = 1;
+			otr_status_change(server, from, OTR_STATUS_SMP_INCOMING);
+			break;
+		case OTRL_SMPEVENT_ASK_FOR_ANSWER:
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_ANSWER_HEADER, from);
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_ANSWER_QUESTION, question);
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_ANSWER_FOOTER);
+			opc->ask_secret = 1;
+			otr_status_change(server, from, OTR_STATUS_SMP_INCOMING);
+			break;
+		case OTRL_SMPEVENT_IN_PROGRESS:
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_IN_PROGRESS, from);
+			otr_status_change(server, from, OTR_STATUS_SMP_FINALIZE);
+			break;
+		case OTRL_SMPEVENT_SUCCESS:
+			printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SMP_SUCCESS, from);
+			otr_status_change(server, from, OTR_STATUS_SMP_SUCCESS);
+			break;
+		case OTRL_SMPEVENT_ABORT:
+			otr_auth_abort(server, context->username);
+			otr_status_change(server, from, OTR_STATUS_SMP_ABORTED);
+			break;
+		case OTRL_SMPEVENT_FAILURE:
+		case OTRL_SMPEVENT_CHEATED:
+		case OTRL_SMPEVENT_ERROR:
+			printformat(server, from, MSGLEVEL_CLIENTERROR, TXT_OTR_SMP_FAILURE, from);
+			otr_status_change(server, from, OTR_STATUS_SMP_FAILED);
+			break;
+		default:
+			g_warning("Received unknown SMP event: %d", smp_event);
+			break;
 	}
 }
 

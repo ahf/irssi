@@ -74,12 +74,10 @@ static void instag_load(struct otr_user_state *ustate)
 	}
 
 	err = otrl_instag_read(ustate->otr_state, filename);
-	if (err == GPG_ERR_NO_ERROR) {
+	if (err == GPG_ERR_NO_ERROR)
 		IRSSI_OTR_DEBUG("Instance tags loaded from %9%s%9", filename);
-	} else {
-		IRSSI_OTR_DEBUG("Error loading instance tags: %d (%d)",
-				gcry_strerror(err), gcry_strsource(err));
-	}
+	else
+		IRSSI_OTR_DEBUG("Error loading instance tags: %d (%d)", gcry_strerror(err), gcry_strsource(err));
 
 	free(filename);
 }
@@ -238,7 +236,7 @@ void otr_free_user_state(struct otr_user_state *ustate)
 		ustate->otr_state = NULL;
 	}
 
-	free(ustate);
+	g_free(ustate);
 }
 
 /*
@@ -269,17 +267,15 @@ int otr_send(SERVER_REC *server, const char *msg, const char *to, char **otr_msg
 	g_assert(server != NULL);
 	g_assert(server->tag != NULL);
 
-	IRSSI_OTR_DEBUG("Sending message...");
+	IRSSI_OTR_DEBUG("OTR: Sending message: %s", msg);
 
 	err = otrl_message_sending(user_state_global->otr_state, &otr_ops,
 		server, server->tag, OTR_PROTOCOL_ID, to, OTRL_INSTAG_BEST, msg, NULL, otr_msg,
 		OTRL_FRAGMENT_SEND_ALL_BUT_LAST, &ctx, add_peer_context_cb, server);
 	if (err) {
-		IRSSI_NOTICE(server, to, "Send failed.");
+		g_warning("OTR: Send failed: %s", gcry_strerror(err));
 		return -1;
 	}
-
-	IRSSI_OTR_DEBUG("Message sent...");
 
 	/* Add peer context to OTR context if none exists. */
 	if (ctx && !ctx->app_data) {
@@ -433,13 +429,8 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 
 	g_assert(ustate != NULL);
 
-	if (server == NULL && str_fp == NULL) {
-		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
-		return;
-	}
-
 	/* No human string fingerprint given. */
-	if (str_fp == NULL) {
+	if (*str_fp == '\0') {
 		ctx = otr_find_context(server, nick, FALSE);
 		if (ctx == NULL) {
 			return;
@@ -454,12 +445,11 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 		fp_trust = otr_find_hash_fingerprint_from_human(str_fp, ustate);
 	}
 
-	if (fp_trust) {
-		int ret;
+	if (fp_trust != NULL) {
+		otrl_privkey_hash_to_human(peerfp, fp_trust->fingerprint);
 
-		ret = otrl_context_is_fingerprint_trusted(fp_trust);
-		if (ret) {
-			IRSSI_NOTICE(server, nick, "Already trusted!");
+		if (otrl_context_is_fingerprint_trusted(fp_trust)) {
+			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_ALREADY_TRUSTED_ERROR, peerfp);
 			return;
 		}
 
@@ -469,12 +459,9 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		otr_status_change(server, nick, OTR_STATUS_TRUST_MANUAL);
 
-		otrl_privkey_hash_to_human(peerfp, fp_trust->fingerprint);
-		IRSSI_NOTICE(server, nick, "Fingerprint %g%s%n trusted!", peerfp);
-	} else {
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n NOT found",
-				(str_fp != NULL) ? str_fp : "");
-	}
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_TRUSTED, peerfp);
+	} else
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
 }
 
 /*
@@ -489,18 +476,17 @@ void otr_auth_abort(SERVER_REC *server, const char *nick)
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
-		IRSSI_NOTICE(server, nick, "Context for %9%s%9 not found.", nick);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_NICK_ERROR, nick);
 		return;
 	}
 
 	otrl_message_abort_smp(user_state_global->otr_state, &otr_ops, server, ctx);
 	otr_status_change(server, nick, OTR_STATUS_SMP_ABORT);
 
-	if (ctx->smstate->nextExpected != OTRL_SMP_EXPECT1) {
-		IRSSI_NOTICE(server, nick, "%rOngoing authentication aborted%n");
-	} else {
-		IRSSI_NOTICE(server, nick, "%rAuthentication aborted%n");
-	}
+	if (ctx->smstate->nextExpected != OTRL_SMP_EXPECT1)
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_ONGOING_ABORTED);
+	else
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_ABORTED);
 }
 
 /*
@@ -519,7 +505,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 
 	ctx = otr_find_context(server, nick, 0);
 	if (ctx == NULL) {
-		IRSSI_NOTICE(server, nick, "Context for %9%s%9 not found.", nick);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_NICK_ERROR, nick);
 		return;
 	}
 
@@ -528,7 +514,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 	g_assert(opc != NULL);
 
 	if (ctx->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
-		printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_AUTH_MISSING_SESSION_ERROR);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_AUTH_MISSING_SESSION_ERROR);
 		return;
 	}
 
@@ -555,7 +541,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 		otrl_message_respond_smp(user_state_global->otr_state, &otr_ops,
 				server, ctx, (unsigned char *) secret, secret_len);
 		otr_status_change(server, nick, OTR_STATUS_SMP_RESPONDED);
-		IRSSI_NOTICE(server, nick, "%yResponding to authentication...%n");
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_RESPONSE);
 	} else {
 		if (question != NULL)
 			otrl_message_initiate_smp_q(user_state_global->otr_state, &otr_ops, server, ctx, question, (unsigned char *) secret, secret_len);
@@ -563,7 +549,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 			otrl_message_initiate_smp(user_state_global->otr_state, &otr_ops, server, ctx, (unsigned char *) secret, secret_len);
 
 		otr_status_change(server, nick, OTR_STATUS_SMP_STARTED);
-		IRSSI_NOTICE(server, nick, "%yInitiated authentication...%n");
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_INITIATED);
 	}
 
 	opc->ask_secret = 0;
@@ -714,19 +700,11 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 		break;
 	case OTR_MSG_WAIT_MORE:
 		ret = 1;
-
-		if (full_msg) {
-			free(full_msg);
-		}
-
+		g_free_not_null(full_msg);
 		return ret;
 	case OTR_MSG_ERROR:
 		ret = -1;
-
-		if (full_msg) {
-			free(full_msg);
-		}
-
+		g_free_not_null(full_msg);
 		return ret;
 	}
 
@@ -734,8 +712,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 		&otr_ops, server, server->tag, OTR_PROTOCOL_ID, from, recv_msg, new_msg,
 		&tlvs, &ctx, add_peer_context_cb, server);
 	if (ret) {
-		IRSSI_OTR_DEBUG("Ignoring message of length %d from %s to %s.\n"
-				"%s", strlen(msg), from, server->tag, msg);
+		IRSSI_OTR_DEBUG("Ignoring message of length %d from %s to %s.\n" "%s", strlen(msg), from, server->tag, msg);
 	} else {
 		if (*new_msg) {
 			IRSSI_OTR_DEBUG("Converted received message.");
@@ -744,21 +721,17 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 
 	/* Check for disconnected message */
 	OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
-	if (tlv) {
+	if (tlv != NULL) {
 		otr_status_change(server, from, OTR_STATUS_PEER_FINISHED);
-		IRSSI_NOTICE(server, from, "%9%s%9 has finished the OTR "
-				"conversation. If you want to continue talking enter "
-				"%9/otr finish%9 for plaintext or %9/otr init%9 to restart.",
-				from);
+		printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_FINISHED, from);
 	}
 
 	otrl_tlv_free(tlvs);
 
 	IRSSI_OTR_DEBUG("Message received.");
 
-	if (full_msg) {
-		free(full_msg);
-	}
+	g_free_not_null(full_msg);
+
 	return ret;
 }
 
@@ -858,19 +831,13 @@ Fingerprint *otr_find_hash_fingerprint_from_human(const char *human_fp, struct o
  */
 void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_user_state *ustate)
 {
-	int ret;
 	char fp[OTRL_PRIVKEY_FPRINT_HUMAN_LEN];
 	Fingerprint *fp_forget;
 	ConnContext *ctx = NULL;
 	struct otr_peer_context *opc;
 
-	if (server == NULL && str_fp == NULL) {
-		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
-		return;
-	}
-
 	/* No human string fingerprint given. */
-	if (str_fp == NULL) {
+	if (*str_fp == '\0') {
 		ctx = otr_find_context(server, nick, FALSE);
 		if (ctx == NULL) {
 			return;
@@ -887,12 +854,8 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 
 	if (fp_forget) {
 		/* Don't do anything if context is in encrypted state. */
-		ret = check_fp_encrypted_msgstate(fp_forget);
-		if (ret) {
-			IRSSI_NOTICE(server, nick, "Fingerprint "
-					"context is still encrypted. Finish the OTR "
-					"session before forgetting a fingerprint "
-					"(%9/otr finish%9).");
+		if (check_fp_encrypted_msgstate(fp_forget)) {
+			printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_CONTEXT_ENCRYPTED);
 			return;
 		}
 
@@ -901,10 +864,9 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 		otrl_context_forget_fingerprint(fp_forget, 1);
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n forgotten.", fp);
-	} else {
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n NOT found", (str_fp != NULL) ? str_fp : "");
-	}
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_FORGOTTEN, fp);
+	} else
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
 }
 
 /*
@@ -918,19 +880,13 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 		struct otr_user_state *ustate)
 {
-	int ret;
 	char fp[OTRL_PRIVKEY_FPRINT_HUMAN_LEN];
 	Fingerprint *fp_distrust;
 	ConnContext *ctx;
 	struct otr_peer_context *opc;
 
-	if (server == NULL && str_fp == NULL) {
-		IRSSI_NOTICE(NULL, nick, "Need a fingerprint!");
-		return;
-	}
-
 	/* No human string fingerprint given. */
-	if (str_fp != NULL) {
+	if (*str_fp == '\0') {
 		ctx = otr_find_context(server, nick, FALSE);
 		if (ctx == NULL) {
 			return;
@@ -945,22 +901,19 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 		fp_distrust = otr_find_hash_fingerprint_from_human(str_fp, ustate);
 	}
 
-	if (fp_distrust) {
-		ret = otrl_context_is_fingerprint_trusted(fp_distrust);
-		if (!ret) {
+	if (fp_distrust != NULL) {
+		otrl_privkey_hash_to_human(fp, fp_distrust->fingerprint);
+
+		if (!otrl_context_is_fingerprint_trusted(fp_distrust)) {
 			/* Fingerprint already not trusted. Do nothing. */
-			IRSSI_NOTICE(server, nick, "Already not trusting it!");
+			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_ALREADY_DISTRUSTED_ERROR, fp);
 			return;
 		}
 
-		otrl_privkey_hash_to_human(fp, fp_distrust->fingerprint);
 		otrl_context_set_trust(fp_distrust, "");
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n distrusted.",
-				fp);
-	} else {
-		IRSSI_NOTICE(server, nick, "Fingerprint %y%s%n NOT found",
-				(str_fp != NULL) ? str_fp : "");
-	}
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_DISTRUSTED, fp);
+	} else
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
 }
