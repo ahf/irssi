@@ -86,7 +86,6 @@ static void ops_secure(void *opdata, ConnContext *context)
 	otrl_privkey_fingerprint(user_state_global->otr_state, ownfp, context->accountname, OTR_PROTOCOL_ID);
 
 	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_UNAUTHENCIATED_PEER_WARNING);
-	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_LOCAL_FINGERPRINT, ownfp);
 	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_REMOTE_FINGERPRINT, context->username, peerfp);
 }
 
