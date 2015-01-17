@@ -200,7 +200,7 @@ ConnContext *otr_find_context(SERVER_REC *server, const char *nick, int create)
  */
 struct otr_peer_context *otr_create_peer_context(void)
 {
-	return zmalloc(sizeof(struct otr_peer_context));
+	return g_new0(struct otr_peer_context, 1);
 }
 
 /*
@@ -210,7 +210,7 @@ struct otr_user_state *otr_init_user_state(void)
 {
 	struct otr_user_state *ous = NULL;
 
-	ous = zmalloc(sizeof(*ous));
+	ous = g_new0(struct otr_user_state, 1);
 	if (ous == NULL) {
 		return ous;
 	}
@@ -636,7 +636,7 @@ static enum otr_msg_status enqueue_otr_fragment(const char *msg, struct otr_peer
 		pos = strstr(msg, OTR_MSG_BEGIN_TAG);
 		if (pos && (pos == msg) && msg[msg_len - 1] != OTR_MSG_END_TAG) {
 			/* Allocate full message buffer with an extra for NULL byte. */
-			opc->full_msg = zmalloc((msg_len * 2) + 1);
+			ops->full_msg = g_new0(char, (msg_len * 2) + 1);
 			if (!opc->full_msg) {
 				ret = OTR_MSG_ERROR;
 				return ret;

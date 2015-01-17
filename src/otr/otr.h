@@ -57,11 +57,6 @@
 #define OTR_IRC_MARKER_ME             "/me "
 #define OTR_IRC_MARKER_ME_LEN         sizeof(OTR_IRC_MARKER_ME) - 1
 
-/*
- * Memory allocation zeroed. Really useful!
- */
-#define zmalloc(x) calloc(1, x)
-
 /* Irssi otr user state */
 struct otr_user_state {
 	OtrlUserState otr_state;
