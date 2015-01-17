@@ -675,7 +675,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	g_assert(server != NULL);
 	g_assert(server->tag != NULL);
 
-	IRSSI_OTR_DEBUG("Receiving message...");
+	IRSSI_OTR_DEBUG("Receiving message: %s", msg);
 
 	ctx = otr_find_context(server, from, 1);
 	if (ctx == NULL) {
@@ -683,36 +683,35 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	}
 
 	/* Add peer context to OTR context if none exists */
-	if (ctx->app_data == NULL) {
+	if (ctx->app_data == NULL)
 		add_peer_context_cb(server, ctx);
-	}
 
 	opc = ctx->app_data;
 	g_assert(opc != NULL);
 
 	ret = enqueue_otr_fragment(msg, opc, &full_msg);
 	switch (ret) {
-	case OTR_MSG_ORIGINAL:
-		recv_msg = msg;
-		break;
-	case OTR_MSG_USE_QUEUE:
-		recv_msg = full_msg;
-		break;
-	case OTR_MSG_WAIT_MORE:
-		ret = 1;
-		g_free_not_null(full_msg);
-		return ret;
-	case OTR_MSG_ERROR:
-		ret = -1;
-		g_free_not_null(full_msg);
-		return ret;
+		case OTR_MSG_ORIGINAL:
+			recv_msg = msg;
+			break;
+		case OTR_MSG_USE_QUEUE:
+			recv_msg = full_msg;
+			break;
+		case OTR_MSG_WAIT_MORE:
+			ret = 1;
+			g_free_not_null(full_msg);
+			return ret;
+		case OTR_MSG_ERROR:
+			ret = -1;
+			g_free_not_null(full_msg);
+			return ret;
 	}
 
 	ret = otrl_message_receiving(user_state_global->otr_state,
 		&otr_ops, server, server->tag, OTR_PROTOCOL_ID, from, recv_msg, new_msg,
 		&tlvs, &ctx, add_peer_context_cb, server);
 	if (ret) {
-		IRSSI_OTR_DEBUG("Ignoring message of length %d from %s to %s.\n" "%s", strlen(msg), from, server->tag, msg);
+		IRSSI_OTR_DEBUG("Ignoring message of length %d from %s to %s.\n%s", strlen(msg), from, server->tag, msg);
 	} else {
 		if (*new_msg) {
 			IRSSI_OTR_DEBUG("Converted received message.");
@@ -897,9 +896,8 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 		g_assert(opc != NULL);
 
 		fp_distrust = opc->active_fingerprint;
-	} else {
+	} else
 		fp_distrust = otr_find_hash_fingerprint_from_human(str_fp, ustate);
-	}
 
 	if (fp_distrust != NULL) {
 		otrl_privkey_hash_to_human(fp, fp_distrust->fingerprint);
@@ -911,6 +909,7 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 		}
 
 		otrl_context_set_trust(fp_distrust, "");
+
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
 		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_DISTRUSTED, fp);

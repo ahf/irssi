@@ -21,8 +21,7 @@
 #include "module.h"
 #include "otr-formats.h"
 
-static OtrlPolicy OTR_DEFAULT_POLICY =
-	OTRL_POLICY_MANUAL | OTRL_POLICY_WHITESPACE_START_AKE;
+static OtrlPolicy OTR_DEFAULT_POLICY = OTRL_POLICY_MANUAL | OTRL_POLICY_WHITESPACE_START_AKE;
 
 /*
  * Return default policy for now.
@@ -83,10 +82,8 @@ static void ops_secure(void *opdata, ConnContext *context)
 	}
 
 	/* Not authenticated. Let's print out the fingerprints for comparison. */
-	otrl_privkey_hash_to_human(peerfp,
-			context->active_fingerprint->fingerprint);
-	otrl_privkey_fingerprint(user_state_global->otr_state, ownfp,
-			context->accountname, OTR_PROTOCOL_ID);
+	otrl_privkey_hash_to_human(peerfp, context->active_fingerprint->fingerprint);
+	otrl_privkey_fingerprint(user_state_global->otr_state, ownfp, context->accountname, OTR_PROTOCOL_ID);
 
 	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_UNAUTHENCIATED_PEER_WARNING);
 	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_LOCAL_FINGERPRINT, ownfp);
@@ -323,9 +320,7 @@ static const char *ops_otr_error_message(void *opdata, ConnContext *context,
  */
 static void ops_otr_error_message_free(void *opdata, const char *err_msg)
 {
-	if (err_msg) {
-		free((char *)err_msg);
-	}
+	g_free_not_null((char *)err_msg);
 }
 
 /*

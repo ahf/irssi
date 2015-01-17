@@ -74,14 +74,11 @@ static void sig_server_sendmsg(SERVER_REC *server, const char *target,
 /*
  * Pipes all incoming private messages through OTR
  */
-void sig_message_private(SERVER_REC *server, const char *msg,
-		const char *nick, const char *address)
+void sig_message_private(SERVER_REC *server, const char *msg, const char *nick, const char *address)
 {
-	int ret;
 	char *new_msg = NULL;
 
-	ret = otr_receive(server, msg, nick, &new_msg);
-	if (ret) {
+	if (otr_receive(server, msg, nick, &new_msg)) {
 		signal_stop();
 		otrl_message_free(new_msg);
 		return;
@@ -98,8 +95,7 @@ void sig_message_private(SERVER_REC *server, const char *msg,
 		 */
 		if (strncmp(new_msg, OTR_IRC_MARKER_ME, OTR_IRC_MARKER_ME_LEN) == 0) {
 			signal_stop();
-			signal_emit("message irc action", 5, server,
-					new_msg + OTR_IRC_MARKER_ME_LEN, nick, address, nick);
+			signal_emit("message irc action", 5, server, new_msg + OTR_IRC_MARKER_ME_LEN, nick, address, nick);
 		} else {
 			/* OTR received message */
 			signal_continue(4, server, new_msg, nick, address);
@@ -107,7 +103,6 @@ void sig_message_private(SERVER_REC *server, const char *msg,
 	}
 
 	otrl_message_free(new_msg);
-	return;
 }
 
 /*
