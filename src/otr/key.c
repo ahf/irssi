@@ -29,6 +29,13 @@
 #include <unistd.h>
 
 #include "key.h"
+
+#include "levels.h"
+#include "network.h"
+#include "pidwait.h"
+#include "printtext.h"
+
+#include "irssi-otr.h"
 #include "otr-formats.h"
 
 /*

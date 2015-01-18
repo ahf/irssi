@@ -21,9 +21,17 @@
 
 #define _GNU_SOURCE
 #include <glib.h>
-#include <glib/gprintf.h>
-#include <glib/gstdio.h>
-#include <stdio.h>
+
+#include "module.h"
+
+#include "signals.h"
+#include "queries.h"
+#include "commands.h"
+
+#include "irc.h"
+#include "irc-servers.h"
+#include "irc-queries.h"
+#include "irc-commands.h"
 
 #include "key.h"
 #include "otr.h"
@@ -175,23 +183,6 @@ static void cmd_quit(const char *data, void *server, WI_ITEM_REC *item)
 }
 
 /*
- * Handle otr statusbar of irssi.
- */
-static void otr_statusbar(struct SBAR_ITEM_REC *item, int get_size_only)
-{
-	WI_ITEM_REC *wi = active_win->active;
-	QUERY_REC *query = QUERY(wi);
-	enum otr_status_format formatnum = TXT_OTR_MODULE_NAME;
-
-	if (query && query->server && query->server->connrec) {
-		formatnum = otr_get_status_format(query->server, query->name);
-	}
-
-	statusbar_item_default_handler(item, get_size_only,
-			formatnum ? fe_otr_formats[formatnum].def : "", " ", FALSE);
-}
-
-/*
  * Create otr module directory if none exists.
  */
 static void create_module_dir(void)
@@ -251,9 +242,6 @@ void otr_core_init(void)
 	command_bind_irc_first("me", NULL, (SIGNAL_FUNC) cmd_me);
 
 	otr_fe_init();
-
-	statusbar_item_register("otr", NULL, otr_statusbar);
-	statusbar_items_redraw("window");
 }
 
 /*
@@ -269,8 +257,6 @@ void otr_core_deinit(void)
 
 	command_unbind("quit", (SIGNAL_FUNC) cmd_quit);
 	command_unbind("me", (SIGNAL_FUNC) cmd_me);
-
-	statusbar_item_unregister("otr");
 
 	otr_finishall(user_state_global);
 

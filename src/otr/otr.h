@@ -28,7 +28,8 @@
 #include <libotr/context.h>
 #include <libotr/privkey.h>
 
-#include "irssi-otr.h"
+#include "common.h"
+#include "servers.h"
 
 /* irssi module name */
 #define MODULE_NAME                   "otr/core"

@@ -22,25 +22,6 @@
 #ifndef IRSSI_IRSSI_OTR_H
 #define IRSSI_IRSSI_OTR_H
 
-#include <src/common.h>
-#include <src/core/commands.h>
-#include <src/core/modules.h>
-#include <src/core/servers.h>
-#include <src/core/signals.h>
-#include <src/core/levels.h>
-#include <src/core/queries.h>
-#include <src/core/pidwait.h>
-#include <src/core/network.h>
-#include <src/fe-common/core/printtext.h>
-#include <src/fe-common/core/fe-windows.h>
-#include <src/core/modules.h>
-#include <src/core/settings.h>
-#include <src/irc/core/irc.h>
-#include <src/irc/core/irc-commands.h>
-#include <src/irc/core/irc-queries.h>
-#include <src/irc/core/irc-servers.h>
-#include <src/fe-text/statusbar-item.h>
-
 /* Ease our life a bit. */
 #define OTR_IRSSI_MSG_PREFIX	"%9OTR%9: "
 

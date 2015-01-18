@@ -21,6 +21,9 @@
 #ifndef IRSSI_OTR_KEY_H
 #define IRSSI_OTR_KEY_H
 
+#include "common.h"
+#include "servers.h"
+
 #include "otr.h"
 
 void key_gen_run(struct otr_user_state *ustate, const char *account_name);

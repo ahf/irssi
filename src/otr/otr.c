@@ -25,6 +25,11 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "levels.h"
+#include "signals.h"
+#include "printtext.h"
+
+#include "irssi-otr.h"
 #include "otr-formats.h"
 #include "key.h"
 
@@ -787,7 +792,6 @@ enum otr_status_format otr_get_status_format(SERVER_REC *server, const char *nic
 void otr_status_change(SERVER_REC *server, const char *nick,
 		enum otr_status_event event)
 {
-	statusbar_items_redraw("otr");
 	signal_emit("otr event", 3, server, nick, statusbar_txt[event]);
 }
 

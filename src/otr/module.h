@@ -21,7 +21,9 @@
 #ifndef IRSSI_OTR_MODULE
 #define IRSSI_OTR_MODULE
 
-void sig_message_private(SERVER_REC *server, const char *msg,
-		const char *nick, const char *address);
+#include "common.h"
+#include "servers.h"
+
+void sig_message_private(SERVER_REC *server, const char *msg, const char *nick, const char *address);
 
 #endif /* IRSSI_OTR_MODULE */

@@ -20,6 +20,14 @@
  * Franklin Street, Fifth Floor, Boston, MA 02110-1301,USA
  */
 
+#include "common.h"
+#include "levels.h"
+#include "printtext.h"
+#include "commands.h"
+#include "irc.h"
+#include "irc-servers.h"
+#include "irc-queries.h"
+
 #include "otr.h"
 #include "otr-formats.h"
 #include "key.h"
