@@ -22,7 +22,7 @@ source code tree.
    anything between users using OTR.
 
 2. Fuzzy matching of fingerprints in OTR commands that accepts a fingerprint.
-3. We killed statusbar_items_redraw("otr") in cmd_otr() in 51b3bba95e2603c3d69de0dc6665c66227537676
+3. Bring OTR statusbar back to life.
 4. Make '/otr' context sensitive: '/otr' is an alias for '/otr init' in an insecure query window, otherwise it's an alias for '/otr info'.
 
 ## Notes from #OTR @ OFTC
