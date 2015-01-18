@@ -193,50 +193,6 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 }
 
 /*
- * Generate OTR key. This function is executed as a child process.
- *
- * NOTE: NO irssi interaction should be done here like emitting signals or else
- * it causes a segfaults of libperl.
- */
-static void generate_key(GIOChannel *pipe)
-{
-	g_assert(pipe != NULL);
-
-	pid_t pid;
-
-	pid = fork();
-
-	if (pid > 0) {
-		/* parent process */
-		pidwait_add(pid);
-		return;
-	}
-
-	if (pid != 0) {
-		/* error */
-		g_warning("generate_key(): fork() failed");
-	}
-
-	/* child process */
-	gcry_error_t err;
-
-	key_gen_state.status = KEY_GEN_RUNNING;
-	emit_event(pipe, KEY_GEN_RUNNING, GPG_ERR_NO_ERROR);
-
-	err = otrl_privkey_generate(key_gen_state.ustate->otr_state, key_gen_state.key_file_path, key_gen_state.account_name, OTR_PROTOCOL_ID);
-
-	if (err != GPG_ERR_NO_ERROR) {
-		emit_event(pipe, KEY_GEN_ERROR, err);
-		_exit(99);
-		return;
-	}
-
-	emit_event(pipe, KEY_GEN_FINISHED, GPG_ERR_NO_ERROR);
-
-	_exit(99);
-}
-
-/*
  * Run key generation in a seperate process (takes ages). The other process
  * will rewrite the key file, we shouldn't change anything till it's done and
  * we've reloaded the keys.
@@ -294,9 +250,50 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	worker->pipes[0] = g_io_channel_new(fd[0]);
 	worker->pipes[1] = g_io_channel_new(fd[1]);
 
-	generate_key(worker->pipes[1]);
+	pid_t pid;
+	pid = fork();
 
-	worker->tag = g_input_add(worker->pipes[0], G_INPUT_READ, (GInputFunction)read_key_gen_status, worker);
+	if (pid > 0) {
+		/* Parent process */
+		pidwait_add(pid);
+		worker->tag = g_input_add(worker->pipes[0], G_INPUT_READ, (GInputFunction)read_key_gen_status, worker);
+		return;
+	}
+
+	if (pid != 0) {
+		/* error */
+		g_warning("Key generation failed: %s", g_strerror(errno));
+
+		g_source_remove(worker->tag);
+
+		g_io_channel_shutdown(worker->pipes[0], TRUE, NULL);
+		g_io_channel_unref(worker->pipes[0]);
+
+		g_io_channel_shutdown(worker->pipes[1], TRUE, NULL);
+		g_io_channel_unref(worker->pipes[1]);
+
+		g_free(worker);
+
+		return;
+	}
+
+	/* Child process */
+	gcry_error_t err;
+
+	key_gen_state.status = KEY_GEN_RUNNING;
+	emit_event(worker->pipes[1], KEY_GEN_RUNNING, GPG_ERR_NO_ERROR);
+
+	err = otrl_privkey_generate(key_gen_state.ustate->otr_state, key_gen_state.key_file_path, key_gen_state.account_name, OTR_PROTOCOL_ID);
+
+	if (err != GPG_ERR_NO_ERROR) {
+		emit_event(worker->pipes[1], KEY_GEN_ERROR, err);
+		_exit(99);
+		return;
+	}
+
+	emit_event(worker->pipes[1], KEY_GEN_FINISHED, GPG_ERR_NO_ERROR);
+
+	_exit(99);
 }
 
 /*
