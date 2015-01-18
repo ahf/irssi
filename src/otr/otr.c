@@ -297,11 +297,11 @@ void otr_contexts(struct otr_user_state *ustate)
 	g_assert(ustate != NULL);
 
 	if (ustate->otr_state->context_root == NULL) {
-		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_ERROR);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_CTX_MISSING);
 		return;
 	}
 
-	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_HEADER);
+	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_HEADER);
 
 	/* Iterate over all contextes of the user state. */
 	for (ctx = ustate->otr_state->context_root; ctx != NULL; ctx = ctx->next) {
@@ -333,20 +333,20 @@ void otr_contexts(struct otr_user_state *ustate)
 			if (used) {
 				switch (best_mstate) {
 					case OTRL_MSGSTATE_ENCRYPTED:
-						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_ENCRYPTED_STATE_LINE, accountname, username);
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_ENCRYPTED_LINE, accountname, username);
 						break;
 					case OTRL_MSGSTATE_PLAINTEXT:
-						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_PLAINTEXT_STATE_LINE, accountname, username);
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_PLAINTEXT_LINE, accountname, username);
 						break;
 					case OTRL_MSGSTATE_FINISHED:
-						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_FINISHED_STATE_LINE, accountname, username);
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_FINISHED_LINE, accountname, username);
 						break;
 					default:
-						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNKNOWN_STATE_LINE, accountname, username);
+						printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_UNKNOWN_LINE, accountname, username);
 						break;
 				};
 			} else
-				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNUSED_STATE_LINE, accountname, username);
+				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_UNUSED_LINE, accountname, username);
 
 			/* Hash fingerprint to human. */
 			otrl_privkey_hash_to_human(human_fp, fp->fingerprint);
@@ -354,15 +354,15 @@ void otr_contexts(struct otr_user_state *ustate)
 			trust = fp->trust;
 			if (trust && trust[0] != '\0') {
 				if (strncmp(trust, "smp", 3) == 0)
-					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_SMP_STATE_LINE, human_fp);
+					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_SMP_LINE, human_fp);
 				else
-					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_MANUAL_STATE_LINE, human_fp);
+					printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_MANUAL_LINE, human_fp);
 			} else
-				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_UNVERIFIED_STATE_LINE, human_fp);
+				printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_UNVERIFIED_LINE, human_fp);
 		}
 	}
 
-	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CONTEXT_LIST_FOOTER);
+	printformat(NULL, NULL, MSGLEVEL_CLIENTCRAP, TXT_OTR_CTX_LIST_FOOTER);
 }
 
 /*
@@ -377,7 +377,7 @@ void otr_finish(SERVER_REC *server, const char *nick)
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
-		printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_FINALIZE_NOTHING_TO_DO);
+		printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_SESSION_ALREADY_FINISHED);
 		return;
 	}
 
@@ -386,7 +386,7 @@ void otr_finish(SERVER_REC *server, const char *nick)
 
 	otr_status_change(server, nick, OTR_STATUS_FINISHED);
 
-	printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_FINALIZE_COMPLETED, nick);
+	printformat(server, nick, MSGLEVEL_CRAP, TXT_OTR_SESSION_FINISHING, nick);
 }
 
 /*
@@ -449,7 +449,7 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 		otrl_privkey_hash_to_human(peerfp, fp_trust->fingerprint);
 
 		if (otrl_context_is_fingerprint_trusted(fp_trust)) {
-			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_ALREADY_TRUSTED_ERROR, peerfp);
+			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FP_ALREADY_TRUSTED, peerfp);
 			return;
 		}
 
@@ -459,9 +459,9 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		otr_status_change(server, nick, OTR_STATUS_TRUST_MANUAL);
 
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_TRUSTED, peerfp);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_TRUSTED, peerfp);
 	} else
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FP_MISSING, str_fp);
 }
 
 /*
@@ -476,7 +476,7 @@ void otr_auth_abort(SERVER_REC *server, const char *nick)
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_NICK_ERROR, nick);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CTX_NICK_MISSING, nick);
 		return;
 	}
 
@@ -484,9 +484,9 @@ void otr_auth_abort(SERVER_REC *server, const char *nick)
 	otr_status_change(server, nick, OTR_STATUS_SMP_ABORT);
 
 	if (ctx->smstate->nextExpected != OTRL_SMP_EXPECT1)
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_ONGOING_ABORTED);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTH_ONGOING_ABORTED);
 	else
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_ABORTED);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTH_ABORTED);
 }
 
 /*
@@ -505,7 +505,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 
 	ctx = otr_find_context(server, nick, 0);
 	if (ctx == NULL) {
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CONTEXT_MISSING_NICK_ERROR, nick);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_CTX_NICK_MISSING, nick);
 		return;
 	}
 
@@ -514,7 +514,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 	g_assert(opc != NULL);
 
 	if (ctx->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_AUTH_MISSING_SESSION_ERROR);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_SESSION_MISSING);
 		return;
 	}
 
@@ -541,7 +541,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 		otrl_message_respond_smp(user_state_global->otr_state, &otr_ops,
 				server, ctx, (unsigned char *) secret, secret_len);
 		otr_status_change(server, nick, OTR_STATUS_SMP_RESPONDED);
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_RESPONSE);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTH_RESPONSE);
 	} else {
 		if (question != NULL)
 			otrl_message_initiate_smp_q(user_state_global->otr_state, &otr_ops, server, ctx, question, (unsigned char *) secret, secret_len);
@@ -549,7 +549,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 			otrl_message_initiate_smp(user_state_global->otr_state, &otr_ops, server, ctx, (unsigned char *) secret, secret_len);
 
 		otr_status_change(server, nick, OTR_STATUS_SMP_STARTED);
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTHENTICATION_INITIATED);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_AUTH_INITIATED);
 	}
 
 	opc->ask_secret = 0;
@@ -636,7 +636,7 @@ static enum otr_msg_status enqueue_otr_fragment(const char *msg, struct otr_peer
 		pos = strstr(msg, OTR_MSG_BEGIN_TAG);
 		if (pos && (pos == msg) && msg[msg_len - 1] != OTR_MSG_END_TAG) {
 			/* Allocate full message buffer with an extra for NULL byte. */
-			ops->full_msg = g_new0(char, (msg_len * 2) + 1);
+			opc->full_msg = g_new0(char, (msg_len * 2) + 1);
 			if (!opc->full_msg) {
 				ret = OTR_MSG_ERROR;
 				return ret;
@@ -854,7 +854,7 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 	if (fp_forget) {
 		/* Don't do anything if context is in encrypted state. */
 		if (check_fp_encrypted_msgstate(fp_forget)) {
-			printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_CONTEXT_ENCRYPTED);
+			printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_CTX_ENCRYPTED);
 			return;
 		}
 
@@ -863,9 +863,9 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 		otrl_context_forget_fingerprint(fp_forget, 1);
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_FORGOTTEN, fp);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_FORGOTTEN, fp);
 	} else
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FP_MISSING, str_fp);
 }
 
 /*
@@ -904,7 +904,7 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		if (!otrl_context_is_fingerprint_trusted(fp_distrust)) {
 			/* Fingerprint already not trusted. Do nothing. */
-			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_ALREADY_DISTRUSTED_ERROR, fp);
+			printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FP_ALREADY_DISTRUSED, fp);
 			return;
 		}
 
@@ -912,7 +912,7 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		/* Update fingerprints file. */
 		key_write_fingerprints(ustate);
-		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FINGERPRINT_DISTRUSTED, fp);
+		printformat(server, nick, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_DISTRUSTED, fp);
 	} else
-		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FINGERPRINT_NOT_FOUND, str_fp);
+		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_FP_MISSING, str_fp);
 }

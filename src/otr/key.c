@@ -145,7 +145,7 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 
 	if (g_io_channel_read_block(pipe, &event, sizeof(event)) == -1) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-				TXT_OTR_KEY_GENERATION_ERROR,
+				TXT_OTR_KEYGEN_FAILED,
 				key_gen_state.account_name,
 				g_strerror(errno));
 		return;
@@ -168,7 +168,7 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 
 		if (event.status == KEY_GEN_ERROR) {
 			printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-					TXT_OTR_KEY_GENERATION_ERROR,
+					TXT_OTR_KEYGEN_FAILED,
 					key_gen_state.account_name,
 					gcry_strerror(key_gen_state.gcry_error));
 			reset_key_gen_state();
@@ -179,12 +179,12 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 
 		if (err != GPG_ERR_NO_ERROR) {
 			printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-					TXT_OTR_KEY_GENERATION_ERROR,
+					TXT_OTR_KEYGEN_FAILED,
 					key_gen_state.account_name,
 					gcry_strerror(key_gen_state.gcry_error));
 		} else {
 			printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE,
-					TXT_OTR_KEY_GENERATION_COMPLETED,
+					TXT_OTR_KEYGEN_COMPLETED,
 					key_gen_state.account_name);
 		}
 
@@ -250,7 +250,7 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	g_assert(account_name != NULL);
 
 	if (key_gen_state.status != KEY_GEN_IDLE) {
-		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEY_GENERATION_RUNNING, key_gen_state.account_name);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEYGEN_RUNNING, key_gen_state.account_name);
 		return;
 	}
 
@@ -262,18 +262,18 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	key_gen_state.key_file_path = file_path_build(OTR_KEYFILE);
 	if (key_gen_state.key_file_path == NULL) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-				TXT_OTR_KEY_GENERATION_ERROR,
+				TXT_OTR_KEYGEN_FAILED,
 				key_gen_state.account_name,
 				g_strerror(errno));
 		reset_key_gen_state();
 		return;
 	}
 
-	printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEY_GENERATION_STARTED, key_gen_state.account_name);
+	printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEYGEN_STARTED, key_gen_state.account_name);
 
 	if (pipe(fd) != 0) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-				TXT_OTR_KEY_GENERATION_ERROR,
+				TXT_OTR_KEYGEN_FAILED,
 				key_gen_state.account_name,
 				g_strerror(errno));
 		reset_key_gen_state();
@@ -284,7 +284,7 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 
 	if (worker == NULL) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR,
-				TXT_OTR_KEY_GENERATION_ERROR,
+				TXT_OTR_KEYGEN_FAILED,
 				key_gen_state.account_name,
 				g_strerror(errno));
 		reset_key_gen_state();

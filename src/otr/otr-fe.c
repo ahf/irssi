@@ -271,13 +271,13 @@ static void cmd_otr_info(const char *data)
 	for (key = user_state_global->otr_state->privkey_root; key != NULL; key = key->next) {
 		otrl_privkey_fingerprint(user_state_global->otr_state, ownfp, key->accountname, OTR_PROTOCOL_ID);
 
-		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_FINGERPRINT_INFO, key->accountname, ownfp);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_FP_NICK, key->accountname, ownfp);
 
 		empty = FALSE;
 	}
 
 	if (empty)
-		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_ERROR_NO_KEYS);
+		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_KEYS_UNAVAILABLE);
 }
 
 void otr_fe_init(void)

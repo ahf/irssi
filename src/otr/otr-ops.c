@@ -70,7 +70,7 @@ static void ops_secure(void *opdata, ConnContext *context)
 	/* This should *really* not happened */
 	g_assert(context->msgstate == OTRL_MSGSTATE_ENCRYPTED);
 
-	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SECURE);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_SECURE);
 	otr_status_change(server, context->username, OTR_STATUS_GONE_SECURE);
 
 	opc = context->app_data;
@@ -85,8 +85,9 @@ static void ops_secure(void *opdata, ConnContext *context)
 	otrl_privkey_hash_to_human(peerfp, context->active_fingerprint->fingerprint);
 	otrl_privkey_fingerprint(user_state_global->otr_state, ownfp, context->accountname, OTR_PROTOCOL_ID);
 
-	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_UNAUTHENCIATED_PEER_WARNING);
-	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_REMOTE_FINGERPRINT, context->username, peerfp);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_UNAUTHENTICATED_WARNING);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_INFO, server->nick, ownfp);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_FP_INFO, context->username, peerfp);
 }
 
 /*
@@ -96,7 +97,7 @@ static void ops_insecure(void *opdata, ConnContext *context)
 {
 	SERVER_REC *server = opdata;
 
-	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_INSECURE);
+	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_INSECURE);
 	otr_status_change(server, context->username, OTR_STATUS_GONE_INSECURE);
 }
 
@@ -118,13 +119,13 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event, ConnC
 		case OTRL_MSGEVENT_NONE:
 			break;
 		case OTRL_MSGEVENT_ENCRYPTION_REQUIRED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ENCRYPTION_REQUIRED);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_ENCRYPTION_REQUIRED);
 			break;
 		case OTRL_MSGEVENT_ENCRYPTION_ERROR:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ENCRYPTION_ERROR);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_ENCRYPTION_ERROR);
 			break;
 		case OTRL_MSGEVENT_CONNECTION_ENDED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_CONNECTION_ENDED, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_ENCRYPTION_ENDED, username);
 			break;
 		case OTRL_MSGEVENT_SETUP_ERROR:
 			if (!err) {
@@ -132,27 +133,27 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event, ConnC
 			}
 			switch (err) {
 				case GPG_ERR_INV_VALUE:
-					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MALFORMED_MESSAGE);
+					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_MALFORMED, username);
 					break;
 				default:
-					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_ERROR, gcry_strerror(err));
+					printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_ERROR, gcry_strerror(err));
 					break;
 			}
 			break;
 		case OTRL_MSGEVENT_MSG_REFLECTED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MESSAGE_REFLECTED);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_REFLECTED, username);
 			break;
 		case OTRL_MSGEVENT_MSG_RESENT:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_MESSAGE_RESENT, username, message);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_RESENT, username, message);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_NOT_IN_PRIVATE:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_NOT_IN_PRIVATE, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_NOT_IN_PRIVATE, username);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_UNREADABLE:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNREADABLE, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_UNREADABLE, username);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_MALFORMED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_MALFORMED, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_MALFORMED, username);
 			break;
 		case OTRL_MSGEVENT_LOG_HEARTBEAT_RCVD:
 			IRSSI_OTR_DEBUG("Heartbeat received from %s.", username);
@@ -161,10 +162,10 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event, ConnC
 			IRSSI_OTR_DEBUG("Heartbeat sent to %s.", username);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_ERROR, message);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_ERROR, message);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_UNENCRYPTED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNENCRYPTED, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_UNENCRYPTED, username);
 
 			/*
 			 * This is a hack I found to send the message in a private window of
@@ -178,7 +179,7 @@ static void ops_handle_msg_event(void *opdata, OtrlMessageEvent msg_event, ConnC
 			signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_UNRECOGNIZED:
-			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MESSAGE_EVENT_RECEIVED_MESSAGE_UNRECOGNIZED, username);
+			printformat(server, username, MSGLEVEL_CLIENTERROR, TXT_OTR_MSG_UNRECOGNIZED, username);
 			break;
 		case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
 			IRSSI_OTR_DEBUG("%s has sent a message for a different instance.", username);
