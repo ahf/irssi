@@ -44,7 +44,6 @@ struct otr_user_state *user_state_global;
 static void sig_server_sendmsg(SERVER_REC *server, const char *target,
 		const char *msg, void *target_type_p)
 {
-	int ret;
 	char *otrmsg = NULL;
 
 	if (GPOINTER_TO_INT(target_type_p) != SEND_TARGET_NICK) {
@@ -53,8 +52,7 @@ static void sig_server_sendmsg(SERVER_REC *server, const char *target,
 	}
 
 	/* Critical section. On error, message MUST NOT be sent */
-	ret = otr_send(server, msg, target, &otrmsg);
-	if (ret) {
+	if (otr_send(server, msg, target, &otrmsg)) {
 		signal_stop();
 		otrl_message_free(otrmsg);
 		return;
@@ -216,8 +214,7 @@ static void create_module_dir(void)
 	free(dir_path);
 }
 
-void irssi_send_message(SERVER_REC *server, const char *recipient,
-		const char *msg)
+void irssi_send_message(SERVER_REC *server, const char *recipient, const char *msg)
 {
 	/*
 	 * Apparently, there are cases where the server record is NULL which has
@@ -228,8 +225,7 @@ void irssi_send_message(SERVER_REC *server, const char *recipient,
 		return;
 	}
 
-	server->send_message(server, recipient, msg,
-			GPOINTER_TO_INT(SEND_TARGET_NICK));
+	server->send_message(server, recipient, msg, GPOINTER_TO_INT(SEND_TARGET_NICK));
 }
 
 /*
