@@ -37,7 +37,7 @@ before_install:
     - cd irssi-*
 
 install:
-    - ./configure --with-proxy --with-bot --with-perl=module --prefix=$HOME/irssi-build
+    - ./configure --with-proxy --with-bot --with-perl=module --with-otr=no --prefix=$HOME/irssi-build
       $( $UNITTESTS && echo --enable-always-build-tests )
     - make CFLAGS="-Wall -Werror -Werror=declaration-after-statement"
     - make install
