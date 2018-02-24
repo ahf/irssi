@@ -60,8 +60,7 @@ static void cmd_otr_init(const char *data, SERVER_REC *server, WI_ITEM_REC *item
 	char *target;
 	ConnContext *ctx;
 
-	if (server == NULL)
-		return;
+	g_return_if_fail(server != NULL);
 
 	if (!server->connected)
 		cmd_return_error(CMDERR_NOT_CONNECTED);
@@ -84,7 +83,7 @@ static void cmd_otr_init(const char *data, SERVER_REC *server, WI_ITEM_REC *item
 	 * Irssi does not handle well the HTML tag in the default OTR query message
 	 * so just send the OTR tag instead. Contact me for a better fix! :)
 	 */
-	irssi_send_message(server, target, "?OTRv23?");
+	otr_send_message(server, target, "?OTRv23?");
 }
 
 static void cmd_otr_finish(const char *data, SERVER_REC *server, WI_ITEM_REC *item)
@@ -92,8 +91,7 @@ static void cmd_otr_finish(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 	QUERY_REC *query;
 	char *target;
 
-	if (server == NULL)
-		return;
+	g_return_if_fail(server != NULL);
 
 	if (!server->connected)
 		cmd_return_error(CMDERR_NOT_CONNECTED);
@@ -115,8 +113,7 @@ static void cmd_otr_trust(const char *data, SERVER_REC *server, WI_ITEM_REC *ite
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
-	if (server == NULL)
-		return;
+	g_return_if_fail(server != NULL);
 
 	query = QUERY(item);
 	target = query ? query->name : NULL;
@@ -143,8 +140,7 @@ static void cmd_otr_distrust(const char *data, SERVER_REC *server, WI_ITEM_REC *
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
-	if (server == NULL)
-		return;
+	g_return_if_fail(server != NULL);
 
 	query = QUERY(item);
 	target = query ? query->name : NULL;
@@ -171,8 +167,7 @@ static void cmd_otr_forget(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 	char *fingerprint, *human_fingerprint;
 	void *free_arg;
 
-	if (server == NULL)
-		return;
+	g_return_if_fail(server != NULL);
 
 	if (!cmd_get_params(data, &free_arg, 1 | PARAM_FLAG_GETREST, &fingerprint))
 		return;

@@ -164,7 +164,7 @@ static void cmd_me(const char *data, IRC_SERVER_REC *server,
 
 	if (otrmsg) {
 		/* Send encrypted message */
-		irssi_send_message(SERVER(server), target, otrmsg);
+		otr_send_message(SERVER(server), target, otrmsg);
 		otrl_message_free(otrmsg);
 	}
 
@@ -203,16 +203,14 @@ static void create_module_dir(void)
 	free(dir_path);
 }
 
-void irssi_send_message(SERVER_REC *server, const char *recipient, const char *msg)
+void otr_send_message(SERVER_REC *server, const char *recipient, const char *msg)
 {
 	/*
 	 * Apparently, there are cases where the server record is NULL which has
 	 * been reported with the irssi xmpp plugin. In that case, just return an
 	 * do nothing.
 	 */
-	if (server == NULL) {
-		return;
-	}
+	g_return_if_fail(server != NULL);
 
 	server->send_message(server, recipient, msg, GPOINTER_TO_INT(SEND_TARGET_NICK));
 }

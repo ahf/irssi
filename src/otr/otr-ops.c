@@ -61,7 +61,7 @@ static void ops_inject_msg(void *opdata, const char *accountname,
 	SERVER_REC *server = opdata;
 
 	IRSSI_OTR_DEBUG("Inject msg:\n[%s]", message);
-	irssi_send_message(server, recipient, message);
+	otr_send_message(server, recipient, message);
 }
 
 /*

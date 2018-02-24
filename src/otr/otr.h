@@ -124,7 +124,7 @@ extern OtrlMessageAppOps otr_ops;
 int otr_debug_get(void);
 void otr_debug_toggle(void);
 
-void irssi_send_message(SERVER_REC *irssi, const char *recipient,
+void otr_send_message(SERVER_REC *irssi, const char *recipient,
 		const char *message);
 void otr_status_change(SERVER_REC *irssi, const char *nick,
 		enum otr_status_event event);
