@@ -125,7 +125,6 @@ static void sig_query_destroyed(QUERY_REC *query)
 static void cmd_me(const char *data, IRC_SERVER_REC *server,
 		WI_ITEM_REC *item)
 {
-	int ret;
 	const char *target;
 	char *msg, *otrmsg = NULL;
 	QUERY_REC *query;
@@ -147,13 +146,11 @@ static void cmd_me(const char *data, IRC_SERVER_REC *server,
 
 	target = window_item_get_target(item);
 
-	ret = asprintf(&msg, OTR_IRC_MARKER_ME "%s", data);
-	if (ret < 0) {
-		return;
-	}
+	msg = g_strdup_printf(OTR_IRC_MARKER_ME "%s", data);
+	g_return_if_fail(msg != NULL);
 
 	/* Critical section. On error, message MUST NOT be sent */
-	ret = otr_send(query->server, msg, target, &otrmsg);
+	otr_send(query->server, msg, target, &otrmsg);
 	free(msg);
 
 	if (otrmsg == NULL) {
@@ -185,14 +182,12 @@ static void cmd_quit(const char *data, void *server, WI_ITEM_REC *item)
  */
 static void create_module_dir(void)
 {
-	int ret;
 	char *dir_path = NULL;
 	struct stat statbuf;
 
 	/* Create ~/.irssi/otr directory. */
-	ret = asprintf(&dir_path, "%s/%s", get_irssi_dir(), OTR_DIR);
-	if (ret < 0)
-		g_error("Unable to allocate memory for OTR directory path.");
+	dir_path = g_strdup_printf("%s/%s", get_irssi_dir(), OTR_DIR);
+	g_return_if_fail(dir_path != NULL);
 
 	if (stat(dir_path, &statbuf) != 0) {
 		if (g_mkdir_with_parents(dir_path, 0700) != 0)

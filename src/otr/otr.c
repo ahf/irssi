@@ -69,10 +69,8 @@ static void instag_load(struct otr_user_state *ustate)
 	g_return_if_fail(ustate != NULL);
 
 	/* Getting the otr instance filename path */
-	ret = asprintf(&filename, "%s%s", get_irssi_dir(), OTR_INSTAG_FILE);
-	if (ret < 0) {
-		return;
-	}
+	filename = g_strdup_printf("%s%s", get_irssi_dir(), OTR_INSTAG_FILE);
+	g_return_if_fail(filename != NULL);
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {

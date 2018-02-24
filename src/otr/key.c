@@ -88,18 +88,10 @@ static struct key_gen_data key_gen_state = {
  */
 static char *file_path_build(const char *path)
 {
-	int ret;
-	char *filename;
-
 	g_return_val_if_fail(path != NULL, NULL);
 
 	/* Either NULL or the filename is returned here which is valid. */
-	ret = asprintf(&filename, "%s/%s", get_irssi_dir(), path);
-	if (ret < 0) {
-		filename = NULL;
-	}
-
-	return filename;
+	return g_strdup_printf("%s/%s", get_irssi_dir(), path);
 }
 
 /*
