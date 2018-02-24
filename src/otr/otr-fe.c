@@ -27,6 +27,7 @@
 #include "irc.h"
 #include "irc-servers.h"
 #include "irc-queries.h"
+#include "statusbar-item.h"
 
 #include "otr.h"
 #include "otr-formats.h"
@@ -38,6 +39,9 @@ static void cmd_otr(const char *data, SERVER_REC *server, void *item)
 		data = "info"; // FIXME(ahf): Is this really what we want as default?
 
 	command_runsub("otr", data, server, item);
+
+	// We always redraw the OTR statusbar, just in case.
+	statusbar_items_redraw("otr");
 }
 
 static void cmd_otr_debug(const char *data)
@@ -288,6 +292,20 @@ static void cmd_otr_info(const char *data)
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_KEYS_UNAVAILABLE);
 }
 
+static void statusbar_otr(struct SBAR_ITEM_REC *item, int get_size_only)
+{
+	WI_ITEM_REC *wi_item = active_win->active;
+	QUERY_REC *query = QUERY(wi_item);
+	enum otr_status_format format = TXT_OTR_MODULE_NAME;
+
+	if (query && query->server && query->server->connrec) {
+		format = otr_get_status_format(query->server, query->name);
+	}
+
+	statusbar_item_default_handler(item, get_size_only,
+			format ? fe_otr_formats[format].def : "", " ", FALSE);
+}
+
 void otr_fe_init(void)
 {
 	theme_register(fe_otr_formats);
@@ -305,6 +323,9 @@ void otr_fe_init(void)
 	command_bind("otr genkey", NULL, (SIGNAL_FUNC) cmd_otr_genkey);
 	command_bind("otr contexts", NULL, (SIGNAL_FUNC) cmd_otr_contexts);
 	command_bind("otr info", NULL, (SIGNAL_FUNC) cmd_otr_info);
+
+	statusbar_item_register("otr", NULL, statusbar_otr);
+	statusbar_items_redraw("window");
 }
 
 void otr_fe_deinit(void)
