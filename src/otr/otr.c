@@ -28,6 +28,7 @@
 #include "levels.h"
 #include "signals.h"
 #include "printtext.h"
+#include "statusbar-item.h"
 
 #include "irssi-otr.h"
 #include "otr-formats.h"
