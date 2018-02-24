@@ -74,9 +74,9 @@ static void ops_secure(void *opdata, ConnContext *context)
 	SERVER_REC *server = opdata;
 	struct otr_peer_context *opc;
 
-	g_assert(context != NULL);
+	g_return_if_fail(context != NULL);
 	/* This should *really* not happened */
-	g_assert(context->msgstate == OTRL_MSGSTATE_ENCRYPTED);
+	g_return_if_fail(context->msgstate == OTRL_MSGSTATE_ENCRYPTED);
 
 	printformat(server, context->username, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_SECURE);
 	otr_status_change(server, context->username, OTR_STATUS_GONE_SECURE);
@@ -244,7 +244,7 @@ static void ops_smp_event(void *opdata, OtrlSMPEvent smp_event,
 	 * call or if non existent when returned from
 	 * otrl_message_sending/receiving.
 	 */
-	g_assert(opc != NULL);
+	g_return_if_fail(opc != NULL);
 
 	opc->smp_event = smp_event;
 

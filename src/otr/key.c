@@ -91,7 +91,7 @@ static char *file_path_build(const char *path)
 	int ret;
 	char *filename;
 
-	g_assert(path != NULL);
+	g_return_val_if_fail(path != NULL, NULL);
 
 	/* Either NULL or the filename is returned here which is valid. */
 	ret = asprintf(&filename, "%s/%s", get_irssi_dir(), path);
@@ -109,7 +109,7 @@ static void emit_event(GIOChannel *pipe, enum key_gen_status status, gcry_error_
 {
 	struct key_gen_event event;
 
-	g_assert(pipe != NULL);
+	g_return_if_fail(pipe != NULL);
 
 	event.status = status;
 	event.error = error;
@@ -146,7 +146,7 @@ static void read_key_gen_status(struct key_gen_worker *worker, GIOChannel *pipe)
 	struct key_gen_event event;
 	gcry_error_t err;
 
-	g_assert(worker != NULL);
+	g_return_if_fail(worker != NULL);
 
 	fcntl(g_io_channel_unix_get_fd(pipe), F_SETFL, O_NONBLOCK);
 
@@ -211,8 +211,8 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	gcry_error_t err;
 	pid_t pid;
 
-	g_assert(ustate != NULL);
-	g_assert(account_name != NULL);
+	g_return_if_fail(ustate != NULL);
+	g_return_if_fail(account_name != NULL);
 
 	if (key_gen_state.status != KEY_GEN_IDLE) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTNOTICE, TXT_OTR_KEYGEN_RUNNING, key_gen_state.account_name);
@@ -310,7 +310,7 @@ void key_write_fingerprints(struct otr_user_state *ustate)
 	gcry_error_t err;
 	char *filename;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_FINGERPRINTS_FILE);
 	if (filename == NULL) {
@@ -336,7 +336,7 @@ void key_write_instags(struct otr_user_state *ustate)
 	gcry_error_t err;
 	char *filename;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_INSTAG_FILE);
 	if (filename == NULL) {
@@ -363,7 +363,7 @@ void key_load(struct otr_user_state *ustate)
 	gcry_error_t err;
 	char *filename;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_KEYFILE);
 	if (filename == NULL) {
@@ -395,7 +395,7 @@ void key_load_fingerprints(struct otr_user_state *ustate)
 	gcry_error_t err;
 	char *filename;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_FINGERPRINTS_FILE);
 	if (filename == NULL) {

@@ -66,7 +66,7 @@ static void instag_load(struct otr_user_state *ustate)
 	char *filename;
 	gcry_error_t err;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	/* Getting the otr instance filename path */
 	ret = asprintf(&filename, "%s%s", get_irssi_dir(), OTR_INSTAG_FILE);
@@ -126,7 +126,7 @@ static SERVER_REC *find_server_by_network(const char *network)
 	GSList *tmp;
 	SERVER_REC *server;
 
-	g_assert(network != NULL);
+	g_return_val_if_fail(network != NULL, NULL);
 
 	for (tmp = servers; tmp; tmp = tmp->next) {
 		server = tmp->data;
@@ -147,7 +147,7 @@ static int check_fp_encrypted_msgstate(Fingerprint *fp)
 {
 	ConnContext *context;
 
-	g_assert(fp != NULL);
+	g_return_val_if_fail(fp != NULL, 0);
 
 	/* Loop on all fingerprint's context(es). */
 	for (context = fp->context;
@@ -208,9 +208,9 @@ ConnContext *otr_find_context(SERVER_REC *server, const char *nick, int create)
 {
 	ConnContext *ctx = NULL;
 
-	g_assert(server != NULL);
-	g_assert(server->tag != NULL);
-	g_assert(nick != NULL);
+	g_return_val_if_fail(server != NULL, NULL);
+	g_return_val_if_fail(server->tag != NULL, NULL);
+	g_return_val_if_fail(nick != NULL, NULL);
 
 	ctx = otrl_context_find(user_state_global->otr_state, nick, server->tag,
 			OTR_PROTOCOL_ID, OTRL_INSTAG_BEST, create, NULL,
@@ -288,8 +288,8 @@ int otr_send(SERVER_REC *server, const char *msg, const char *to, char **otr_msg
 	gcry_error_t err;
 	ConnContext *ctx = NULL;
 
-	g_assert(server != NULL);
-	g_assert(server->tag != NULL);
+	g_return_val_if_fail(server != NULL, -1);
+	g_return_val_if_fail(server->tag != NULL, -1);
 
 	IRSSI_OTR_DEBUG("OTR: Sending message: %s", msg);
 
@@ -318,7 +318,7 @@ void otr_contexts(struct otr_user_state *ustate)
 	ConnContext *ctx, *c_iter;
 	Fingerprint *fp;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	if (ustate->otr_state->context_root == NULL) {
 		printformat(NULL, NULL, MSGLEVEL_CLIENTERROR, TXT_OTR_CTX_MISSING);
@@ -396,8 +396,8 @@ void otr_finish(SERVER_REC *server, const char *nick)
 {
 	ConnContext *ctx;
 
-	g_assert(server != NULL);
-	g_assert(nick != NULL);
+	g_return_if_fail(server != NULL);
+	g_return_if_fail(nick != NULL);
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
@@ -421,7 +421,7 @@ void otr_finishall(struct otr_user_state *ustate)
 	ConnContext *context;
 	SERVER_REC *server;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	for (context = ustate->otr_state->context_root; context;
 			context = context->next) {
@@ -451,7 +451,7 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 	ConnContext *ctx;
 	Fingerprint *fp_trust;
 
-	g_assert(ustate != NULL);
+	g_return_if_fail(ustate != NULL);
 
 	/* No human string fingerprint given. */
 	if (*str_fp == '\0') {
@@ -462,7 +462,7 @@ void otr_trust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		opc = ctx->app_data;
 		/* Always NEED a peer context or else code error. */
-		g_assert(opc != NULL);
+		g_return_if_fail(opc != NULL);
 
 		fp_trust = ctx->active_fingerprint;
 	} else {
@@ -495,8 +495,8 @@ void otr_auth_abort(SERVER_REC *server, const char *nick)
 {
 	ConnContext *ctx;
 
-	g_assert(server != NULL);
-	g_assert(nick != NULL);
+	g_return_if_fail(server != NULL);
+	g_return_if_fail(nick != NULL);
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
@@ -524,8 +524,8 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 	ConnContext *ctx;
 	struct otr_peer_context *opc;
 
-	g_assert(server != NULL);
-	g_assert(nick != NULL);
+	g_return_if_fail(server != NULL);
+	g_return_if_fail(nick != NULL);
 
 	ctx = otr_find_context(server, nick, 0);
 	if (ctx == NULL) {
@@ -535,7 +535,7 @@ void otr_auth(SERVER_REC *server, const char *nick, const char *question,
 
 	opc = ctx->app_data;
 	/* Again, code flow error. */
-	g_assert(opc != NULL);
+	g_return_if_fail(opc != NULL);
 
 	if (ctx->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
 		printformat(server, nick, MSGLEVEL_CLIENTERROR, TXT_OTR_SESSION_MISSING);
@@ -601,8 +601,8 @@ static enum otr_msg_status enqueue_otr_fragment(const char *msg, struct otr_peer
 	enum otr_msg_status ret;
 	size_t msg_len;
 
-	g_assert(msg != NULL);
-	g_assert(opc != NULL);
+	g_return_val_if_fail(msg != NULL, OTR_MSG_ERROR);
+	g_return_val_if_fail(opc != NULL, OTR_MSG_ERROR);
 
 	/* We are going to use it quite a bit so ease our life a bit. */
 	msg_len = strlen(msg);
@@ -697,8 +697,8 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	struct otr_peer_context *opc;
 	OtrlTLV *tlv = NULL;
 
-	g_assert(server != NULL);
-	g_assert(server->tag != NULL);
+	g_return_val_if_fail(server != NULL, -1);
+	g_return_val_if_fail(server->tag != NULL, -1);
 
 	IRSSI_OTR_DEBUG("Receiving message: %s", msg);
 
@@ -712,7 +712,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 		add_peer_context_cb(server, ctx);
 
 	opc = ctx->app_data;
-	g_assert(opc != NULL);
+	g_return_val_if_fail(opc != NULL, -1);
 
 	ret = enqueue_otr_fragment(msg, opc, &full_msg);
 	switch (ret) {
@@ -768,7 +768,7 @@ enum otr_status_format otr_get_status_format(SERVER_REC *server, const char *nic
 	enum otr_status_format code;
 	ConnContext *ctx = NULL;
 
-	g_assert(server != NULL);
+	g_return_val_if_fail(server != NULL, TXT_OTR_STB_UNKNOWN);
 
 	ctx = otr_find_context(server, nick, FALSE);
 	if (ctx == NULL) {
@@ -869,7 +869,7 @@ void otr_forget(SERVER_REC *server, const char *nick, char *str_fp, struct otr_u
 
 		opc = ctx->app_data;
 		/* Always NEED a peer context or else code error. */
-		g_assert(opc != NULL);
+		g_return_if_fail(opc != NULL);
 
 		fp_forget = opc->active_fingerprint;
 	} else {
@@ -918,7 +918,7 @@ void otr_distrust(SERVER_REC *server, const char *nick, char *str_fp,
 
 		opc = ctx->app_data;
 		/* Always NEED a peer context or else code error. */
-		g_assert(opc != NULL);
+		g_return_if_fail(opc != NULL);
 
 		fp_distrust = opc->active_fingerprint;
 	} else
