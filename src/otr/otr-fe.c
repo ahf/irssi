@@ -345,4 +345,6 @@ void otr_fe_deinit(void)
 	command_unbind("otr genkey", (SIGNAL_FUNC) cmd_otr_genkey);
 	command_unbind("otr contexts", (SIGNAL_FUNC) cmd_otr_contexts);
 	command_unbind("otr info", (SIGNAL_FUNC) cmd_otr_info);
+
+	statusbar_item_unregister("otr");
 }
