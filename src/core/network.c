@@ -81,9 +81,6 @@ int g_io_channel_read_block(GIOChannel *channel, void *data, int len)
 	return received < len ? -1 : 0;
 }
 
-/* Cygwin need this, don't know others.. */
-/*#define BLOCKING_SOCKETS 1*/
-
 IPADDR ip4_any = {
 	AF_INET,
 #if defined(IN6ADDR_ANY_INIT)
