@@ -121,8 +121,8 @@ extern struct otr_user_state *user_state_global;
 /* Libotr ops functions */
 extern OtrlMessageAppOps otr_ops;
 
-/* Active debug or not */
-extern int debug;
+int otr_debug_get(void);
+void otr_debug_toggle(void);
 
 void irssi_send_message(SERVER_REC *irssi, const char *recipient,
 		const char *message);

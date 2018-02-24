@@ -34,6 +34,8 @@
 #include "otr-formats.h"
 #include "key.h"
 
+static int otr_debug = 0;
+
 static const char *statusbar_txt[] = {
 	"FINISHED",
 	"TRUST_MANUAL",
@@ -181,6 +183,22 @@ void otr_control_timer(unsigned int interval, void *opdata)
 	if (interval > 0) {
 		otr_timerid = g_timeout_add_seconds(interval, timer_fired_cb, opdata);
 	}
+}
+
+/*
+ * Is OTR debugging enabled or disabled?
+ */
+int otr_debug_get(void)
+{
+    return otr_debug;
+}
+
+/*
+ * Toggle OTR debugging.
+ */
+void otr_debug_toggle(void)
+{
+    otr_debug = !otr_debug;
 }
 
 /*

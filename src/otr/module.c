@@ -39,8 +39,6 @@
 #include "otr-fe.h"
 #include "misc.h"
 
-int debug = FALSE;
-
 /*
  * Global state for the user. Init when the module loads.
  */

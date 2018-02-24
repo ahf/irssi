@@ -46,9 +46,9 @@ static void cmd_otr(const char *data, SERVER_REC *server, void *item)
 
 static void cmd_otr_debug(const char *data)
 {
-	debug = !debug;
+	otr_debug_toggle();
 
-	if (debug)
+	if (otr_debug_get())
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "OTR debugging enabled");
 	else
 		printtext(NULL, NULL, MSGLEVEL_CRAP, "OTR debugging disabled");

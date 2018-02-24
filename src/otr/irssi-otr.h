@@ -30,7 +30,7 @@
  */
 #define IRSSI_OTR_DEBUG(fmt, ...) \
 	do {                                                                    \
-		if (debug) {                                                        \
+		if (otr_debug_get()) {                                              \
 			printtext(NULL, NULL, MSGLEVEL_MSGS, OTR_IRSSI_MSG_PREFIX fmt,  \
 						## __VA_ARGS__);                                    \
 		}                                                                   \
