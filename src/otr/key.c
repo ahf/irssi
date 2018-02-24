@@ -88,10 +88,10 @@ static struct key_gen_data key_gen_state = {
  */
 static char *file_path_build(const char *path)
 {
-	g_assert(path != NULL);
-
 	int ret;
 	char *filename;
+
+	g_assert(path != NULL);
 
 	/* Either NULL or the filename is returned here which is valid. */
 	ret = asprintf(&filename, "%s/%s", get_irssi_dir(), path);
@@ -208,6 +208,8 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 {
 	struct key_gen_worker *worker;
 	int fd[2];
+	gcry_error_t err;
+	pid_t pid;
 
 	g_assert(ustate != NULL);
 	g_assert(account_name != NULL);
@@ -257,7 +259,6 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	worker->pipes[0] = g_io_channel_new(fd[0]);
 	worker->pipes[1] = g_io_channel_new(fd[1]);
 
-	pid_t pid;
 	pid = fork();
 
 	if (pid > 0) {
@@ -285,8 +286,6 @@ void key_gen_run(struct otr_user_state *ustate, const char *account_name)
 	}
 
 	/* Child process */
-	gcry_error_t err;
-
 	key_gen_state.status = KEY_GEN_RUNNING;
 	emit_event(worker->pipes[1], KEY_GEN_RUNNING, GPG_ERR_NO_ERROR);
 

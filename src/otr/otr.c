@@ -677,6 +677,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	OtrlTLV *tlvs;
 	ConnContext *ctx;
 	struct otr_peer_context *opc;
+	OtrlTLV *tlv = NULL;
 
 	g_assert(server != NULL);
 	g_assert(server->tag != NULL);
@@ -725,7 +726,7 @@ int otr_receive(SERVER_REC *server, const char *msg, const char *from, char **ne
 	}
 
 	/* Check for disconnected message */
-	OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
+	tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
 	if (tlv != NULL) {
 		otr_status_change(server, from, OTR_STATUS_PEER_FINISHED);
 		printformat(server, from, MSGLEVEL_CLIENTCRAP, TXT_OTR_SESSION_FINISHED, from);
