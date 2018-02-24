@@ -191,9 +191,11 @@ static void create_module_dir(void)
 
 	if (stat(dir_path, &statbuf) != 0) {
 		if (g_mkdir_with_parents(dir_path, 0700) != 0)
-			g_error("Unable to create OTR directory path.");
-	} else if (!S_ISDIR(statbuf.st_mode))
-		g_error("%s is not a directory.\nYou should remove it with command: rm %s", dir_path, dir_path);
+			g_warning("Unable to create OTR directory path.");
+	} else if (!S_ISDIR(statbuf.st_mode)) {
+		g_warning("%s is not a directory.", dir_path);
+		g_warning("You should remove it with command: rm %s", dir_path);
+	}
 
 	free(dir_path);
 }
@@ -222,8 +224,7 @@ void otr_core_init(void)
 	otr_lib_init();
 
 	user_state_global = otr_init_user_state();
-	if (user_state_global == NULL)
-		g_error("Unable to allocate global OTR user state");
+	g_return_if_fail(user_state_global != NULL);
 
 	signal_add_first("server sendmsg", (SIGNAL_FUNC) sig_server_sendmsg);
 	signal_add_first("message private", (SIGNAL_FUNC) sig_message_private);
