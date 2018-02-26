@@ -115,14 +115,8 @@ static void emit_event(GIOChannel *pipe, enum key_gen_status status, gcry_error_
 static void reset_key_gen_state(void)
 {
 	/* Safety. */
-	if (key_gen_state.key_file_path != NULL) {
-		free(key_gen_state.key_file_path);
-	}
-
-	/* Pointer dup when key_gen_run is called. */
-	if (key_gen_state.account_name != NULL) {
-		free(key_gen_state.account_name);
-	}
+	g_free(key_gen_state.key_file_path);
+	g_free(key_gen_state.account_name);
 
 	/* Nullify everything. */
 	memset(&key_gen_state, 0, sizeof(key_gen_state));
@@ -305,9 +299,7 @@ void key_write_fingerprints(struct otr_user_state *ustate)
 	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_FINGERPRINTS_FILE);
-	if (filename == NULL) {
-		return;
-	}
+	g_return_if_fail(filename != NULL);
 
 	err = otrl_privkey_write_fingerprints(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
@@ -317,7 +309,7 @@ void key_write_fingerprints(struct otr_user_state *ustate)
 				gcry_strerror(err), gcry_strsource(err));
 	}
 
-	free(filename);
+	g_free(filename);
 }
 
 /*
@@ -331,9 +323,7 @@ void key_write_instags(struct otr_user_state *ustate)
 	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_INSTAG_FILE);
-	if (filename == NULL) {
-		return;
-	}
+	g_return_if_fail(filename != NULL);
 
 	err = otrl_instag_write(ustate->otr_state, filename);
 	if (err == GPG_ERR_NO_ERROR) {
@@ -343,7 +333,7 @@ void key_write_instags(struct otr_user_state *ustate)
 				gcry_strerror(err), gcry_strsource(err));
 	}
 
-	free(filename);
+	g_free(filename);
 }
 
 /*
@@ -358,14 +348,12 @@ void key_load(struct otr_user_state *ustate)
 	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_KEYFILE);
-	if (filename == NULL) {
-		return;
-	}
+	g_return_if_fail(filename != NULL);
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {
 		IRSSI_OTR_DEBUG("No private keys found in %9%s%9", filename);
-		free(filename);
+		g_free(filename);
 		return;
 	}
 
@@ -376,6 +364,8 @@ void key_load(struct otr_user_state *ustate)
 		IRSSI_OTR_DEBUG("Error loading private keys: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
+
+	g_free(filename);
 }
 
 /*
@@ -390,14 +380,12 @@ void key_load_fingerprints(struct otr_user_state *ustate)
 	g_return_if_fail(ustate != NULL);
 
 	filename = file_path_build(OTR_FINGERPRINTS_FILE);
-	if (filename == NULL) {
-		return;
-	}
+	g_return_if_fail(filename != NULL);
 
 	ret = access(filename, F_OK);
 	if (ret < 0) {
 		IRSSI_OTR_DEBUG("No fingerprints found in %9%s%9", filename);
-		free(filename);
+		g_free(filename);
 		return;
 	}
 
@@ -409,4 +397,6 @@ void key_load_fingerprints(struct otr_user_state *ustate)
 		IRSSI_OTR_DEBUG("Error loading fingerprints: %d (%d)",
 				gcry_strerror(err), gcry_strsource(err));
 	}
+
+	g_free(filename);
 }

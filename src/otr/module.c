@@ -151,7 +151,7 @@ static void cmd_me(const char *data, IRC_SERVER_REC *server,
 
 	/* Critical section. On error, message MUST NOT be sent */
 	otr_send(query->server, msg, target, &otrmsg);
-	free(msg);
+	g_free(msg);
 
 	if (otrmsg == NULL) {
 		return;
@@ -197,7 +197,7 @@ static void create_module_dir(void)
 		g_warning("You should remove it with command: rm %s", dir_path);
 	}
 
-	free(dir_path);
+	g_free(dir_path);
 }
 
 void otr_send_message(SERVER_REC *server, const char *recipient, const char *msg)

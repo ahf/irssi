@@ -75,7 +75,7 @@ static void instag_load(struct otr_user_state *ustate)
 	ret = access(filename, F_OK);
 	if (ret < 0) {
 		IRSSI_OTR_DEBUG("no instance tags found at %9%s%9", filename);
-		free(filename);
+		g_free(filename);
 		return;
 	}
 
@@ -85,7 +85,7 @@ static void instag_load(struct otr_user_state *ustate)
 	else
 		IRSSI_OTR_DEBUG("Error loading instance tags: %d (%d)", gcry_strerror(err), gcry_strsource(err));
 
-	free(filename);
+	g_free(filename);
 }
 
 /*
