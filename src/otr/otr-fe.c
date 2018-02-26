@@ -188,7 +188,6 @@ static void cmd_otr_forget(const char *data, SERVER_REC *server, WI_ITEM_REC *it
 
 static void cmd_otr_authabort(const char *data, SERVER_REC *server, WI_ITEM_REC *item)
 {
-	void *free_arg = NULL;
 	QUERY_REC *query;
 	char *target;
 
@@ -196,7 +195,7 @@ static void cmd_otr_authabort(const char *data, SERVER_REC *server, WI_ITEM_REC 
 	target = query ? query->name : NULL;
 
 	if (server == NULL || target == NULL)
-		cmd_param_error(CMDERR_NOT_ENOUGH_PARAMS);
+		cmd_return_error(CMDERR_NOT_ENOUGH_PARAMS);
 
 	otr_auth_abort(server, target);
 }
